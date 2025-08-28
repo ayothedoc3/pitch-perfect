@@ -167,7 +167,6 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
       {/* Answer options */}
       {currentStep < questions.length && !isTyping && (
         <div className="space-y-3">
-          {console.log('Rendering answer options for step:', currentStep, 'question type:', questions[currentStep]?.type)}
           {questions[currentStep].type === 'multiple-choice' && (
             <div className="grid grid-cols-1 gap-2">
               {questions[currentStep].options?.map((option) => (
