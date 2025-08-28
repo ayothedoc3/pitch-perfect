@@ -45,12 +45,18 @@ export class SpeechAnalysisService {
   ];
 
   constructor() {
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error('OpenAI API key not configured');
+    const apiKey = process.env.OPENAI_API_KEY || 'placeholder-key-for-development';
+    
+    // For development, allow placeholder key
+    console.log('NODE_ENV:', process.env.NODE_ENV);
+    console.log('OPENAI_API_KEY present:', !!process.env.OPENAI_API_KEY);
+    
+    if (!process.env.OPENAI_API_KEY && process.env.NODE_ENV === 'production') {
+      throw new Error('OpenAI API key not configured for production');
     }
     
     this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+      apiKey: apiKey,
     });
   }
 
