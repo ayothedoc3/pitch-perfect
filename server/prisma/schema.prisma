@@ -1,0 +1,122 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String?
+  password    String
+  avatar      String?
+  level       String   @default("beginner") // beginner, intermediate, advanced
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // User preferences
+  preferences UserPreferences?
+
+  // User stats
+  totalPitches   Int @default(0)
+  totalFeedback  Int @default(0)
+  currentStreak  Int @default(0)
+  
+  // Relations
+  pitches        Pitch[]
+  sessions       Session[]
+
+  @@map("users")
+}
+
+model UserPreferences {
+  id                String @id @default(cuid())
+  userId            String @unique
+  pitchType         String @default("Startup Pitch")
+  experienceLevel   String @default("Beginner")
+  improvementGoals  String[] // Array of improvement goals
+  practiceFrequency String @default("Weekly")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Pitch {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  type        String   @default("startup") // startup, elevator, sales
+  duration    Int      // seconds
+  videoUrl    String?  // URL to stored video file
+  audioUrl    String?  // URL to stored audio file
+  progress    Int      @default(0) // Analysis progress percentage
+  status      String   @default("recorded") // recorded, analyzing, completed, failed
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analysis     PitchAnalysis?
+  transcription PitchTranscription?
+
+  @@map("pitches")
+}
+
+model PitchAnalysis {
+  id           String @id @default(cuid())
+  pitchId      String @unique
+  overallScore Int
+
+  // Speech Metrics
+  pacing               Float // Words per minute
+  clarity              Float // 0-1 scale
+  fillerWordFrequency  Float // Frequency of um, uh, like, etc.
+  toneVariation        Float // Variation in pitch/tone
+  confidence           Float // Perceived confidence
+
+  // Skill Breakdown (JSON)
+  skillBreakdown Json // Array of {category, score, previousScore}
+  
+  // Feedback
+  feedback     String[] // Array of feedback strings
+  improvements String[] // Array of improvement suggestions
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pitch Pitch @relation(fields: [pitchId], references: [id], onDelete: Cascade)
+
+  @@map("pitch_analysis")
+}
+
+model PitchTranscription {
+  id         String @id @default(cuid())
+  pitchId    String @unique
+  text       String
+  timestamps Json   // Array of {word, start, end}
+  keyPhrases String[] // Array of key phrases found
+  createdAt  DateTime @default(now())
+
+  pitch Pitch @relation(fields: [pitchId], references: [id], onDelete: Cascade)
+
+  @@map("pitch_transcriptions")
+}

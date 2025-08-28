@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface PitchCardProps {
   id: string;
@@ -38,10 +39,11 @@ const PitchCard: React.FC<PitchCardProps> = ({
     <div className="card hover:shadow-lg transition-shadow">
       <div className="relative aspect-video bg-gray-100 rounded-md mb-4 overflow-hidden">
         {thumbnailUrl ? (
-          <img 
+          <Image 
             src={thumbnailUrl} 
             alt={title} 
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gray-200">
@@ -80,8 +82,8 @@ const PitchCard: React.FC<PitchCardProps> = ({
           <span className="font-medium text-gray-700">{feedbackCount}</span> feedback
         </div>
         
-        <Link href={`/pitch/${id}`}>
-<a className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded text-sm">View Details</a>
+        <Link href={`/pitch/${id}`} className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded text-sm">
+          View Details
         </Link>
       </div>
     </div>

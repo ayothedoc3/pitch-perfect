@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import Navigation from '../components/ui/Navigation';
 import PitchCard from '../components/pitch/PitchCard';
 import SkillRadarChart from '../components/visualization/SkillRadarChart';
+import { usePitchStore } from '../stores/pitchStore';
 
 // Sample data for demonstration
 const samplePitches = [
@@ -43,15 +45,29 @@ const sampleSkillData = [
   { category: 'Content', score: 82, previousScore: 75 },
 ];
 
-const summaryStats = [
-  { label: 'Pitches Recorded', value: 3 },
-  { label: 'Feedback Received', value: 10 },
-  { label: 'Avg. Improvement', value: '18%' },
-  { label: 'Streak', value: '3 days' },
-];
 
 export default function Dashboard() {
+  const router = useRouter();
+  const { getRecentPitches, getUserStats } = usePitchStore();
   const [activeTab, setActiveTab] = useState('overview');
+
+  // Get real data from store
+  const recentPitches = getRecentPitches(3);
+  const stats = getUserStats();
+  const displayPitches = recentPitches.length > 0 ? recentPitches : samplePitches.slice(0, 3);
+
+  // Calculate skill data from recent pitches with analysis
+  const pitchesWithAnalysis = displayPitches.filter(pitch => 'analysis' in pitch && pitch.analysis);
+  const skillData = pitchesWithAnalysis.length > 0 && 'analysis' in pitchesWithAnalysis[0] && pitchesWithAnalysis[0].analysis
+    ? (pitchesWithAnalysis[0] as { analysis: { skillBreakdown: Array<{ category: string; score: number; previousScore?: number }> } }).analysis.skillBreakdown 
+    : sampleSkillData;
+
+  const realSummaryStats = [
+    { label: 'Pitches Recorded', value: stats.totalPitches || 3 },
+    { label: 'Feedback Received', value: stats.totalFeedback || 10 },
+    { label: 'Avg. Score', value: stats.averageScore > 0 ? Math.round(stats.averageScore) : '75' },
+    { label: 'Recent Activity', value: `${stats.recentActivity || 3} this week` },
+  ];
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
@@ -64,12 +80,17 @@ export default function Dashboard() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-<button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Record New Pitch</button>
+          <button 
+            onClick={() => router.push('/pitches')}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Record New Pitch
+          </button>
         </div>
         
         {/* Stats Summary */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {summaryStats.map((stat) => (
+          {realSummaryStats.map((stat) => (
             <div key={stat.label} className="card bg-white p-4 shadow-sm hover:shadow-md transition-shadow">
               <p className="text-sm font-medium text-gray-500">{stat.label}</p>
               <p className="text-3xl font-semibold text-gray-900 mt-1">{stat.value}</p>
@@ -105,7 +126,7 @@ export default function Dashboard() {
             <h2 className="text-xl font-semibold text-gray-800">Recent Pitches</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {samplePitches.map((pitch) => (
+              {displayPitches.map((pitch) => (
                 <PitchCard key={pitch.id} {...pitch} />
               ))}
             </div>
@@ -152,7 +173,7 @@ export default function Dashboard() {
           
           {/* Sidebar */}
           <div className="space-y-6">
-            <SkillRadarChart metrics={sampleSkillData} title="Your Skill Progress" />
+            <SkillRadarChart metrics={skillData} title="Your Skill Progress" />
             
             <div className="card">
               <h3 className="text-lg font-medium text-gray-800 mb-4">Suggested Resources</h3>

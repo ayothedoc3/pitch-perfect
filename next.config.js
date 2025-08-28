@@ -1,9 +1,59 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Disable the App Router
-  experimental: {
-    appDir: true,
+  reactStrictMode: true,
+  swcMinify: true,
+  
+  // Environment variables
+  env: {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api',
   },
-}
+
+  // Image domains for user avatars and uploads
+  images: {
+    domains: ['localhost', 'api.pitch-perfect.app'],
+  },
+
+  // Webpack configuration for handling audio/video files
+  webpack: (config) => {
+    config.module.rules.push({
+      test: /\.(mp3|wav|webm|mp4)$/,
+      use: {
+        loader: 'file-loader',
+        options: {
+          publicPath: '/_next/static/media/',
+          outputPath: 'static/media/',
+        },
+      },
+    });
+
+    return config;
+  },
+
+  // Headers for security
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin',
+          },
+        ],
+      },
+    ];
+  },
+
+  // For production builds
+  output: 'standalone',
+};
 
 module.exports = nextConfig 
