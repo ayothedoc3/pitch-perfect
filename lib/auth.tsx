@@ -1,5 +1,5 @@
 // Authentication utilities and context
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authAPI, User, setAuthToken, removeAuthToken, setUser as setStoredUser, getUser as getStoredUser } from './api';
 
 interface AuthContextType {
@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           setUser(response.user);
           setStoredUser(response.user);
         }
-      } catch (error) {
+      } catch {
         // Token is invalid, clear storage
         removeAuthToken();
         setUser(null);
@@ -52,8 +52,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setAuthToken(response.token);
       setUser(response.user);
       setStoredUser(response.user);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Login failed');
+    } catch (error: unknown) {
+      const errorMessage = error && typeof error === 'object' && 'response' in error && 
+        error.response && typeof error.response === 'object' && 'data' in error.response &&
+        error.response.data && typeof error.response.data === 'object' && 'error' in error.response.data
+        ? String(error.response.data.error) : 'Login failed';
+      throw new Error(errorMessage);
     }
   };
 
@@ -64,15 +68,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setAuthToken(response.token);
       setUser(response.user);
       setStoredUser(response.user);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Registration failed');
+    } catch (error: unknown) {
+      const errorMessage = error && typeof error === 'object' && 'response' in error && 
+        error.response && typeof error.response === 'object' && 'data' in error.response &&
+        error.response.data && typeof error.response.data === 'object' && 'error' in error.response.data
+        ? String(error.response.data.error) : 'Registration failed';
+      throw new Error(errorMessage);
     }
   };
 
   const logout = async () => {
     try {
       await authAPI.logout();
-    } catch (error) {
+    } catch {
       // Even if logout API fails, we should clear local state
       console.warn('Logout API failed, but clearing local state');
     } finally {

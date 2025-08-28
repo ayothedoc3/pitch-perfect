@@ -3,7 +3,7 @@ import Webcam from 'react-webcam';
 import { usePitchStore } from '../../stores/pitchStore';
 import { SpeechAnalysisService } from '../../services/analysis/SpeechAnalysisService';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
 
 interface PitchRecorderProps {
   onRecordingComplete: (pitchId: string) => void;
