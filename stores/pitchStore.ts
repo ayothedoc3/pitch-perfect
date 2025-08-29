@@ -70,7 +70,7 @@ interface PitchStore {
   setCurrentPitch: (pitch: Pitch | null) => void;
   setRecording: (isRecording: boolean) => void;
   setAnalyzing: (isAnalyzing: boolean) => void;
-  setUserProfile: (profile: UserProfile) => void;
+  setUserProfile: (profile: UserProfile | null) => void;
   updateUserProfile: (updates: Partial<UserProfile>) => void;
   
   // Utility functions

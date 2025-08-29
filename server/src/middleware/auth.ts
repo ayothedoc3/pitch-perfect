@@ -41,7 +41,7 @@ export const authenticateToken = async (
     req.user = {
       id: session.user.id,
       email: session.user.email,
-      name: session.user.name
+      name: session.user.name || undefined
     };
 
     next();
@@ -51,4 +51,4 @@ export const authenticateToken = async (
   }
 };
 
-export { AuthRequest };
+export type { AuthRequest };
