@@ -86,8 +86,6 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
   }, [displayedText, responses.length]);
   
   const handleAnswer = (answer: string) => {
-    console.log('Answer selected:', answer, 'for question:', questions[currentStep].id);
-    console.log('Current state - step:', currentStep, 'isTyping:', isTyping, 'displayedText length:', displayedText.length);
     
     const newResponse = {
       questionId: questions[currentStep].id,
@@ -97,11 +95,9 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
     setResponses([...responses, newResponse]);
     
     if (currentStep < questions.length - 1) {
-      console.log('Moving to next question, step:', currentStep + 1);
       setCurrentStep(currentStep + 1);
       setDisplayedText('');
     } else {
-      console.log('Onboarding complete, calling onComplete');
       onComplete([...responses, newResponse]);
     }
   };

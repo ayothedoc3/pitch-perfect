@@ -69,7 +69,6 @@ const HomePage: React.FC = () => {
                 size="lg" 
                 className="text-lg"
                 onClick={() => {
-                  console.log('Get Started clicked');
                   setShowOnboarding(true);
                 }}
               >

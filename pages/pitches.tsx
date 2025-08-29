@@ -65,7 +65,6 @@ export default function PitchesPage() {
   const [pitchType, setPitchType] = useState<'startup' | 'elevator' | 'sales'>('startup');
 
   const handleRecordingComplete = (pitchId: string) => {
-    console.log('Recording completed, pitch ID:', pitchId);
     setShowRecorder(false);
     // Navigate to the pitch detail page
     router.push(`/pitch/${pitchId}`);

@@ -41,11 +41,9 @@ export class SpeechAnalysisService {
   ];
 
   constructor() {
-    console.log('Initializing Enhanced Speech Analysis Service');
   }
 
   async analyzeComplete(audioData: Blob, videoDuration: number): Promise<AnalysisResult> {
-    console.log('Starting complete analysis pipeline...');
     
     // Start both transcription and speech analysis in parallel
     const [transcription, metrics] = await Promise.all([
@@ -69,7 +67,6 @@ export class SpeechAnalysisService {
   }
   
   async transcribe(audioData: Blob): Promise<TranscriptionResult> {
-    console.log('Transcribing audio data...');
     
     // Simulate realistic processing time based on audio size
     const processingTime = Math.min(3000, audioData.size / 10000);
@@ -100,7 +97,6 @@ export class SpeechAnalysisService {
   }
   
   async analyzeSpeech(audioData: Blob, videoDuration: number): Promise<SpeechMetrics> {
-    console.log('Analyzing speech patterns...');
     
     // Simulate processing delay
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -272,7 +268,6 @@ export class SpeechAnalysisService {
   async extractAudioFromVideo(videoBlob: Blob): Promise<Blob> {
     // In a real implementation, this would use Web Audio API or similar
     // For now, we'll just return the video blob as-is since our mock analysis doesn't need actual audio
-    console.log('Extracting audio from video...');
     await new Promise(resolve => setTimeout(resolve, 500));
     
     // Create a mock audio blob

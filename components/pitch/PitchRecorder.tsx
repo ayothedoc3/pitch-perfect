@@ -96,7 +96,6 @@ const PitchRecorder: React.FC<PitchRecorderProps> = ({
 
   const analyzeRecording = useCallback(async (pitchId: string, videoBlob: Blob) => {
     try {
-      console.log('Starting AI analysis for pitch:', pitchId);
       
       // Extract audio from video (in real implementation)
       const audioBlob = await analysisService.extractAudioFromVideo(videoBlob);
@@ -117,7 +116,6 @@ const PitchRecorder: React.FC<PitchRecorderProps> = ({
         progress: 100, // Analysis complete
       });
 
-      console.log('Analysis complete for pitch:', pitchId);
       
     } catch (error) {
       console.error('Analysis failed:', error);
