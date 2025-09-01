@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
   
   // Environment variables
   env: {
@@ -52,8 +51,6 @@ const nextConfig = {
     ];
   },
 
-  // For production builds
-  output: 'standalone',
 };
 
 module.exports = nextConfig 
