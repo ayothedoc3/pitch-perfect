@@ -59,7 +59,7 @@ router.post('/register', validate(schemas.register), async (req, res) => {
     const token = jwt.sign(
       { userId: user.id },
       process.env.JWT_SECRET!,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as jwt.SignOptions
     );
 
     // Store session in database
@@ -111,7 +111,7 @@ router.post('/login', validate(schemas.login), async (req, res) => {
     const token = jwt.sign(
       { userId: user.id },
       process.env.JWT_SECRET!,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as jwt.SignOptions
     );
 
     // Clean up old sessions and create new one
