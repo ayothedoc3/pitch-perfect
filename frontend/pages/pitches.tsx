@@ -48,7 +48,7 @@ export default function PitchesPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
         <Head>
-          <title>Record Pitch | Pitch Perfect</title>
+          <title>Record Pitch | PitchBuddy</title>
         </Head>
         <Navigation />
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -110,7 +110,7 @@ export default function PitchesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
       <Head>
-        <title>My Pitches | Pitch Perfect</title>
+        <title>My Pitches | PitchBuddy</title>
       </Head>
       
       <Navigation />

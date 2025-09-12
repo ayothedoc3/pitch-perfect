@@ -53,7 +53,7 @@ const HomePage: React.FC = () => {
       <div className="container mx-auto px-4 py-16">
         <div className="text-center max-w-4xl mx-auto">
           <h1 className="text-6xl font-display font-bold text-foreground mb-6">
-            Pitch Perfect
+            PitchBuddy
           </h1>
           <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
             Master your pitch with AI-powered feedback. Practice, improve, and perfect your presentations with real-time analysis and personalized coaching.

@@ -1,7 +1,7 @@
 {
-  "name": "pitch-perfect-server",
+  "name": "pitchbuddy-server",
   "version": "1.0.0",
-  "description": "Backend API for Pitch Perfect application",
+  "description": "Backend API for PitchBuddy application",
   "main": "dist/server.js",
   "scripts": {
     "dev": "set NODE_ENV=development && tsx watch src/server.ts",

@@ -28,7 +28,7 @@ const samplePosts: CommunityPost[] = [
       level: 'Advanced',
     },
     title: 'Just landed my first investor meeting!',
-    content: 'After practicing on Pitch Perfect for 3 months, I finally got a yes from a seed investor. The AI feedback really helped me nail my delivery timing. Special thanks to everyone who gave peer feedback on my earlier versions!',
+    content: 'After practicing on PitchBuddy for 3 months, I finally got a yes from a seed investor. The AI feedback really helped me nail my delivery timing. Special thanks to everyone who gave peer feedback on my earlier versions!',
     category: 'showcase',
     pitchLink: '/pitch/showcase-1',
     likes: 47,
@@ -141,7 +141,7 @@ export default function CommunityPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
       <Head>
-        <title>Community | Pitch Perfect</title>
+        <title>Community | PitchBuddy</title>
       </Head>
       
       <Navigation />

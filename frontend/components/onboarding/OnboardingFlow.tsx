@@ -105,7 +105,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
   return (
     <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-sm p-6">
       <div className="mb-8 text-center">
-        <h2 className="text-2xl font-bold text-gray-900">Welcome to Pitch Perfect</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Welcome to PitchBuddy</h2>
         <p className="text-gray-600 mt-2">Let&apos;s get to know you to personalize your experience</p>
       </div>
       

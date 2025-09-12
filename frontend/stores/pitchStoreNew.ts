@@ -198,7 +198,7 @@ export const usePitchStore = create<PitchStore>()(
       },
     }),
     {
-      name: 'pitch-perfect-store-v2',
+      name: 'pitchbuddy-store-v2',
       // Only persist pitches list, not the temporary states
       partialize: (state) => ({
         pitches: state.pitches,

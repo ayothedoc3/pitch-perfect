@@ -1,4 +1,4 @@
-# Coolify Deployment Guide for Pitch Perfect
+# Coolify Deployment Guide for PitchBuddy
 
 ## Quick Setup
 
@@ -13,7 +13,7 @@
 - **Port**: 3000
 - **Environment Variables**:
   ```
-  NEXT_PUBLIC_API_URL=https://your-backend-domain.com/api
+  NEXT_PUBLIC_API_URL=https://api.pitchbuddy.online/api
   ```
 
 #### Backend Service
@@ -25,12 +25,12 @@
 - **Port**: 3001
 - **Environment Variables**:
   ```
-  DATABASE_URL=postgresql://postgres:password@db:5432/pitch_perfect?schema=public
+  DATABASE_URL=postgresql://postgres:password@db:5432/pitchbuddy?schema=public
   JWT_SECRET=your-super-secret-jwt-key-change-in-production
   OPENAI_API_KEY=sk-your-openai-api-key-here
   NODE_ENV=production
   PORT=3001
-  FRONTEND_URL=https://your-frontend-domain.com
+  FRONTEND_URL=https://www.pitchbuddy.online
   UPLOAD_MAX_SIZE=100000000
   UPLOAD_DIR=/app/uploads
   ```
@@ -38,7 +38,7 @@
 #### Database Service
 - **Type**: PostgreSQL
 - **Version**: 15
-- **Database Name**: pitch_perfect
+- **Database Name**: pitchbuddy
 - **Username**: postgres
 - **Password**: [set secure password]
 
@@ -50,12 +50,12 @@
 4. Coolify will use the `.coolify/docker-compose.yml` file automatically
 5. Set the following environment variables in Coolify:
    ```
-   DATABASE_URL=postgresql://postgres:password@db:5432/pitch_perfect?schema=public
+   DATABASE_URL=postgresql://postgres:password@db:5432/pitchbuddy?schema=public
    JWT_SECRET=your-super-secret-jwt-key-change-in-production
    OPENAI_API_KEY=sk-your-openai-api-key-here
-   FRONTEND_URL=https://your-frontend-domain.com
-   BACKEND_URL=https://your-backend-domain.com
-   POSTGRES_DB=pitch_perfect
+   FRONTEND_URL=https://www.pitchbuddy.online
+   BACKEND_URL=https://api.pitchbuddy.online
+   POSTGRES_DB=pitchbuddy
    POSTGRES_USER=postgres
    POSTGRES_PASSWORD=your-secure-password
    ```

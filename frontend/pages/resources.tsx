@@ -25,7 +25,7 @@ const sampleResources: Resource[] = [
     category: 'fundamentals',
     duration: '15 min read',
     difficulty: 'beginner',
-    author: 'Pitch Perfect Team',
+    author: 'PitchBuddy Team',
     rating: 4.8,
     url: '#',
   },
@@ -48,7 +48,7 @@ const sampleResources: Resource[] = [
     type: 'template',
     category: 'tools',
     difficulty: 'intermediate',
-    author: 'Pitch Perfect Team',
+    author: 'PitchBuddy Team',
     rating: 4.7,
     url: '#',
     isDownloadable: true,
@@ -84,7 +84,7 @@ const sampleResources: Resource[] = [
     type: 'checklist',
     category: 'tools',
     difficulty: 'beginner',
-    author: 'Pitch Perfect Team',
+    author: 'PitchBuddy Team',
     rating: 4.5,
     url: '#',
     isDownloadable: true,
@@ -164,7 +164,7 @@ export default function ResourcesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
       <Head>
-        <title>Resources | Pitch Perfect</title>
+        <title>Resources | PitchBuddy</title>
       </Head>
       
       <Navigation />

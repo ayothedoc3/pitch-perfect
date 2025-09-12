@@ -1,8 +1,8 @@
-# Pitch Perfect
+# PitchBuddy
 
 ## Description
 
-Pitch Perfect is an AI-powered platform designed to help users practice, receive feedback, and perfect their pitches. It provides tools for recording pitches, analyzing speech, and visualizing skills.
+PitchBuddy is an AI-powered platform designed to help users practice, receive feedback, and perfect their pitches. It provides tools for recording pitches, analyzing speech, and visualizing skills.
 
 ## Project Structure
 

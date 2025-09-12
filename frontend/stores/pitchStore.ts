@@ -194,7 +194,7 @@ export const usePitchStore = create<PitchStore>()(
       },
     }),
     {
-      name: 'pitch-perfect-storage',
+      name: 'pitchbuddy-storage',
       // Only persist certain fields, not video blobs
       partialize: (state) => ({
         pitches: state.pitches.map(pitch => ({

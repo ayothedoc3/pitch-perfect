@@ -21,7 +21,7 @@ const Navigation: React.FC = () => {
     // Clear user profile and all pitches to restart onboarding
     setUserProfile(null);
     // Also clear localStorage
-    localStorage.removeItem('pitch-perfect-storage');
+    localStorage.removeItem('pitchbuddy-storage');
     // Redirect to home page
     router.push('/');
     setShowUserMenu(false);
@@ -46,7 +46,7 @@ const Navigation: React.FC = () => {
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <Link href="/dashboard" className="text-2xl font-display font-bold text-blue-600">
-                Pitch Perfect
+                PitchBuddy
               </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">

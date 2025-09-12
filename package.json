@@ -1,7 +1,7 @@
 {
-  "name": "pitch-perfect-monorepo",
+  "name": "pitchbuddy-monorepo",
   "version": "0.1.0",
-  "description": "AI-powered pitch practice platform",
+  "description": "AI-powered pitch practice platform - PitchBuddy",
   "private": true,
   "scripts": {
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",

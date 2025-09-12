@@ -9,7 +9,7 @@ const nextConfig = {
 
   // Image domains for user avatars and uploads
   images: {
-    domains: ['localhost', 'api.pitch-perfect.app'],
+    domains: ['localhost', 'api.pitchbuddy.online'],
   },
 
   // Webpack configuration for handling audio/video files

@@ -120,7 +120,7 @@ export default function FeedbackPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
       <Head>
-        <title>Feedback | Pitch Perfect</title>
+        <title>Feedback | PitchBuddy</title>
       </Head>
       
       <Navigation />

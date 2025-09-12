@@ -46,7 +46,7 @@ export default function PitchDetailPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
       <Head>
-        <title>{pitch.title} | Pitch Perfect</title>
+        <title>{pitch.title} | PitchBuddy</title>
       </Head>
       
       <Navigation />
@@ -235,7 +235,7 @@ export default function PitchDetailPage() {
                     <div className="border-t pt-6">
                       <h3 className="text-lg font-semibold text-gray-900 mb-3">Request Peer Feedback</h3>
                       <p className="text-gray-600 mb-4">
-                        Get additional insights from the Pitch Perfect community. Share your pitch (anonymously if you prefer) 
+                        Get additional insights from the PitchBuddy community. Share your pitch (anonymously if you prefer) 
                         to receive constructive feedback from other entrepreneurs.
                       </p>
                       <button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg">
