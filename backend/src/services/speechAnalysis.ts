@@ -45,18 +45,12 @@ export class SpeechAnalysisService {
   ];
 
   constructor() {
-    const apiKey = process.env.OPENAI_API_KEY || 'placeholder-key-for-development';
-    
-    // For development, allow placeholder key
-    console.log('NODE_ENV:', process.env.NODE_ENV);
-    console.log('OPENAI_API_KEY present:', !!process.env.OPENAI_API_KEY);
-    
-    if (!process.env.OPENAI_API_KEY && process.env.NODE_ENV === 'production') {
-      throw new Error('OpenAI API key not configured for production');
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY environment variable is required');
     }
     
     this.openai = new OpenAI({
-      apiKey: apiKey,
+      apiKey: process.env.OPENAI_API_KEY,
     });
   }
 
@@ -184,12 +178,8 @@ export class SpeechAnalysisService {
       logger.warn('AI metrics analysis failed, using defaults:', error);
     }
     
-    // Default values if AI analysis fails
-    return {
-      clarity: 0.8,
-      toneVariation: 0.7,
-      confidence: 0.75,
-    };
+    // Return error if AI analysis fails - no fallback values
+    throw new Error('AI metrics analysis failed and no fallback available');
   }
 
   private async generateFeedback(
@@ -227,8 +217,8 @@ export class SpeechAnalysisService {
       logger.warn('AI feedback generation failed, using defaults:', error);
     }
 
-    // Fallback feedback
-    return this.generateDefaultFeedback(metrics, transcription);
+    // Return error if AI feedback generation fails - no fallback
+    throw new Error('AI feedback generation failed and no fallback available');
   }
 
   private generateDefaultFeedback(

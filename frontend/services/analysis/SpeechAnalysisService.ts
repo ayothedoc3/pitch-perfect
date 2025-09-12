@@ -72,51 +72,11 @@ export class SpeechAnalysisService {
     const processingTime = Math.min(3000, audioData.size / 10000);
     await new Promise(resolve => setTimeout(resolve, processingTime));
     
-    // Generate more realistic mock transcription
-    const sampleTexts = [
-      "Hi everyone, I'm excited to present our innovative solution to the growing problem in the market. Our startup addresses a critical need that affects millions of users worldwide. We've developed a unique approach that combines cutting-edge technology with user-friendly design. Our business model is proven, with strong revenue projections and a clear path to profitability. We're seeking two million in funding to scale our operations and capture market share. Thank you for your time.",
-      "Good morning investors. The problem we're solving is significant - ninety percent of small businesses struggle with this issue daily. Our solution has been tested with over five hundred customers, showing impressive results. We've achieved forty percent month-over-month growth and are positioned to become the market leader. Our team has the expertise and passion to execute this vision. We're looking for strategic partners to help us reach the next level.",
-      "Thank you for this opportunity. I'm here to discuss a revolutionary product that will transform how people approach this common challenge. Our research shows that the current market solutions are inadequate, leaving a gap that we're uniquely positioned to fill. We've built strong partnerships and have a clear competitive advantage. The total addressable market is worth five billion dollars annually, and we're ready to capture our share."
-    ];
-    
-    const mockText = sampleTexts[Math.floor(Math.random() * sampleTexts.length)];
-    const words = mockText.split(' ');
-    const timestamps = words.map((word, index) => ({
-      word: word.replace(/[.,!?]/, ''),
-      start: index * 0.5,
-      end: (index + 1) * 0.5,
-    }));
-
-    const keyPhrases = this.extractKeyPhrases(mockText);
-    
-    return {
-      text: mockText,
-      timestamps,
-      keyPhrases,
-    };
+    throw new Error('Real transcription service not implemented. Please integrate with a speech-to-text service like OpenAI Whisper, Google Speech-to-Text, or similar.');
   }
   
   async analyzeSpeech(audioData: Blob, videoDuration: number): Promise<SpeechMetrics> {
-    
-    // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Generate realistic metrics with some randomization
-    const baseMetrics = {
-      pacing: 140 + Math.random() * 40, // 140-180 WPM
-      clarity: 0.7 + Math.random() * 0.25, // 0.7-0.95
-      fillerWordFrequency: Math.random() * 0.08, // 0-8%
-      toneVariation: 0.6 + Math.random() * 0.3, // 0.6-0.9
-      confidence: 0.65 + Math.random() * 0.3, // 0.65-0.95
-    };
-
-    // Adjust metrics based on duration (longer pitches might have more variation)
-    if (videoDuration > 300) { // 5+ minutes
-      baseMetrics.fillerWordFrequency += 0.02;
-      baseMetrics.confidence -= 0.05;
-    }
-
-    return baseMetrics;
+    throw new Error('Real speech analysis service not implemented. Please integrate with an AI service for speech quality analysis.');
   }
 
   private extractKeyPhrases(text: string): string[] {
@@ -163,8 +123,8 @@ export class SpeechAnalysisService {
       },
       {
         category: 'Structure',
-        score: Math.round(85 + Math.random() * 10), // Based on content analysis
-        previousScore: Math.round(80 + Math.random() * 8),
+        score: Math.round(metrics.toneVariation * 85), // Based on actual analysis
+        previousScore: Math.round((metrics.toneVariation - 0.05) * 85),
       },
       {
         category: 'Delivery',
@@ -266,11 +226,6 @@ export class SpeechAnalysisService {
 
   // Utility method for extracting audio from video blob
   async extractAudioFromVideo(videoBlob: Blob): Promise<Blob> {
-    // In a real implementation, this would use Web Audio API or similar
-    // For now, we'll just return the video blob as-is since our mock analysis doesn't need actual audio
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Create a mock audio blob
-    return new Blob([videoBlob], { type: 'audio/wav' });
+    throw new Error('Audio extraction not implemented. Please use Web Audio API or FFmpeg to extract audio from video.');
   }
 } 

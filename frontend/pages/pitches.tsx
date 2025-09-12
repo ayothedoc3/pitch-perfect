@@ -6,54 +6,7 @@ import PitchCard from '../components/pitch/PitchCard';
 import PitchRecorder from '../components/pitch/PitchRecorder';
 import { usePitchStore } from '../stores/pitchStore';
 
-// Enhanced sample data with more pitches
-const samplePitches = [
-  {
-    id: '1',
-    title: 'My Startup Pitch v1',
-    type: 'startup' as const,
-    duration: 182,
-    feedbackCount: 5,
-    dateRecorded: '2023-04-12T14:30:00Z',
-    progress: 75,
-  },
-  {
-    id: '2',
-    title: 'Elevator Pitch for Investors',
-    type: 'elevator' as const,
-    duration: 58,
-    feedbackCount: 3,
-    dateRecorded: '2023-04-08T10:15:00Z',
-    progress: 40,
-  },
-  {
-    id: '3',
-    title: 'Product Sales Pitch',
-    type: 'sales' as const,
-    duration: 245,
-    feedbackCount: 2,
-    dateRecorded: '2023-04-01T16:45:00Z',
-    progress: 90,
-  },
-  {
-    id: '4',
-    title: 'Team Meeting Presentation',
-    type: 'startup' as const,
-    duration: 420,
-    feedbackCount: 8,
-    dateRecorded: '2023-03-25T09:20:00Z',
-    progress: 85,
-  },
-  {
-    id: '5',
-    title: 'Client Proposal Pitch',
-    type: 'sales' as const,
-    duration: 180,
-    feedbackCount: 4,
-    dateRecorded: '2023-03-18T15:10:00Z',
-    progress: 65,
-  },
-];
+// No sample data - pitches page now shows only real user data
 
 export default function PitchesPage() {
   const router = useRouter();
@@ -70,8 +23,8 @@ export default function PitchesPage() {
     router.push(`/pitch/${pitchId}`);
   };
 
-  // Use real pitches from store, fallback to sample data if empty
-  const allPitches = pitches.length > 0 ? pitches : samplePitches;
+  // Use only real pitches from store
+  const allPitches = pitches;
   
   const filteredPitches = allPitches.filter(pitch => {
     if (filter === 'all') return true;

@@ -5,55 +5,7 @@ import Navigation from '../../components/ui/Navigation';
 import SkillRadarChart from '../../components/visualization/SkillRadarChart';
 import { usePitchStore } from '../../stores/pitchStore';
 
-// Mock data - in a real app this would come from an API or database
-const mockPitch = {
-  id: '1',
-  title: 'My Startup Pitch v1',
-  type: 'startup' as const,
-  duration: 182,
-  dateRecorded: '2023-04-12T14:30:00Z',
-  videoUrl: '#', // Would be actual video URL
-  thumbnailUrl: '', // Optional thumbnail
-  transcription: {
-    text: "Hi everyone, I'm Alex and I'm here to talk to you about PitchPerfect, the AI-powered platform that's revolutionizing how entrepreneurs practice and perfect their pitches. The problem is clear: 90% of startups fail to secure funding, and poor pitch delivery is a major factor. Traditional pitch coaching is expensive, time-consuming, and not scalable. That's where PitchPerfect comes in. Our AI analyzes your speech patterns, body language, and content structure to provide instant, actionable feedback. We've already helped over 1,000 entrepreneurs improve their pitch scores by an average of 40%. Our business model is simple: freemium with premium features for $29/month. We're seeking $2M to scale our AI technology and expand our user base to 100,000 active users within 18 months. Thank you.",
-    keyPhrases: ["AI-powered platform", "revolutionizing", "90% of startups fail", "instant feedback", "$2M funding"],
-    timestamps: [
-      { word: "Hi", start: 0.0, end: 0.2 },
-      { word: "everyone", start: 0.3, end: 0.7 },
-      // More timestamps would be here
-    ]
-  },
-  analysis: {
-    overallScore: 78,
-    metrics: {
-      pacing: 150, // words per minute
-      clarity: 0.82,
-      fillerWordFrequency: 0.03,
-      toneVariation: 0.75,
-      confidence: 0.73
-    },
-    skillBreakdown: [
-      { category: 'Clarity', score: 82, previousScore: 72 },
-      { category: 'Confidence', score: 73, previousScore: 65 },
-      { category: 'Structure', score: 85, previousScore: 80 },
-      { category: 'Delivery', score: 78, previousScore: 70 },
-      { category: 'Content', score: 80, previousScore: 75 },
-    ],
-    feedback: [
-      "Strong opening with clear problem statement",
-      "Consider slowing down your pace in the middle section - you're speaking at 180 WPM when 140-160 is optimal",
-      "Excellent use of specific numbers and statistics",
-      "Your confidence improved significantly in the final third of the presentation",
-      "Try to reduce filler words - detected 3 instances of 'um' and 2 of 'uh'"
-    ],
-    improvements: [
-      "Reduce speaking pace by 10-15%",
-      "Practice the middle section to build confidence",
-      "Add a brief pause after key statistics",
-      "Work on eliminating filler words"
-    ]
-  }
-};
+// No mock data - pitch detail page now requires real data
 
 export default function PitchDetailPage() {
   const router = useRouter();
@@ -61,8 +13,22 @@ export default function PitchDetailPage() {
   const { getPitch } = usePitchStore();
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Get pitch data from store, fallback to mock data
-  const pitch = id ? getPitch(id as string) || mockPitch : mockPitch;
+  // Get pitch data from store only - no fallback
+  const pitch = id ? getPitch(id as string) : null;
+  
+  if (!pitch) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
+        <Navigation />
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-800 mb-4">Pitch Not Found</h1>
+            <p className="text-gray-600">The requested pitch could not be found.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const formatDuration = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);

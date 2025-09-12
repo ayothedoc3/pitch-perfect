@@ -6,44 +6,7 @@ import PitchCard from '../components/pitch/PitchCard';
 import SkillRadarChart from '../components/visualization/SkillRadarChart';
 import { usePitchStore } from '../stores/pitchStore';
 
-// Sample data for demonstration
-const samplePitches = [
-  {
-    id: '1',
-    title: 'My Startup Pitch v1',
-    type: 'startup' as const,
-    duration: 182, // 3:02
-    feedbackCount: 5,
-    dateRecorded: '2023-04-12T14:30:00Z',
-    progress: 75,
-  },
-  {
-    id: '2',
-    title: 'Elevator Pitch for Investors',
-    type: 'elevator' as const,
-    duration: 58, // 0:58
-    feedbackCount: 3,
-    dateRecorded: '2023-04-08T10:15:00Z',
-    progress: 40,
-  },
-  {
-    id: '3',
-    title: 'Product Sales Pitch',
-    type: 'sales' as const,
-    duration: 245, // 4:05
-    feedbackCount: 2,
-    dateRecorded: '2023-04-01T16:45:00Z',
-    progress: 90,
-  },
-];
-
-const sampleSkillData = [
-  { category: 'Clarity', score: 85, previousScore: 72 },
-  { category: 'Confidence', score: 68, previousScore: 55 },
-  { category: 'Structure', score: 90, previousScore: 88 },
-  { category: 'Delivery', score: 75, previousScore: 60 },
-  { category: 'Content', score: 82, previousScore: 75 },
-];
+// No sample data - dashboard now shows only real user data
 
 
 export default function Dashboard() {
@@ -54,19 +17,19 @@ export default function Dashboard() {
   // Get real data from store
   const recentPitches = getRecentPitches(3);
   const stats = getUserStats();
-  const displayPitches = recentPitches.length > 0 ? recentPitches : samplePitches.slice(0, 3);
+  const displayPitches = recentPitches;
 
   // Calculate skill data from recent pitches with analysis
   const pitchesWithAnalysis = displayPitches.filter(pitch => 'analysis' in pitch && pitch.analysis);
   const skillData = pitchesWithAnalysis.length > 0 && 'analysis' in pitchesWithAnalysis[0] && pitchesWithAnalysis[0].analysis
     ? (pitchesWithAnalysis[0] as { analysis: { skillBreakdown: Array<{ category: string; score: number; previousScore?: number }> } }).analysis.skillBreakdown 
-    : sampleSkillData;
+    : [];
 
   const realSummaryStats = [
-    { label: 'Pitches Recorded', value: stats.totalPitches || 3 },
-    { label: 'Feedback Received', value: stats.totalFeedback || 10 },
-    { label: 'Avg. Score', value: stats.averageScore > 0 ? Math.round(stats.averageScore) : '75' },
-    { label: 'Recent Activity', value: `${stats.recentActivity || 3} this week` },
+    { label: 'Pitches Recorded', value: stats.totalPitches || 0 },
+    { label: 'Feedback Received', value: stats.totalFeedback || 0 },
+    { label: 'Avg. Score', value: stats.averageScore > 0 ? Math.round(stats.averageScore) : 'N/A' },
+    { label: 'Recent Activity', value: `${stats.recentActivity || 0} this week` },
   ];
   
   return (
