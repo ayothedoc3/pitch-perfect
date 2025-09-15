@@ -104,7 +104,7 @@ const ProcessingPage: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {steps.map((step, index) => {
+              {steps.map((step) => {
                 const isActive = processingStep === step.number;
                 const isCompleted = processingStep > step.number;
                 
@@ -168,8 +168,8 @@ const ProcessingPage: React.FC = () => {
         {/* What to Expect */}
         <Card>
           <CardHeader>
-            <CardTitle>What You'll Get</CardTitle>
-            <CardDescription>Here's what our AI analysis will provide</CardDescription>
+            <CardTitle>What You&apos;ll Get</CardTitle>
+            <CardDescription>Here&apos;s what our AI analysis will provide</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

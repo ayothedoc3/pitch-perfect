@@ -54,7 +54,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <p className="text-sm font-medium text-green-800">
-                  You're in Demo Mode! Your data is saved locally and will work offline.
+                  You&apos;re in Demo Mode! Your data is saved locally and will work offline.
                 </p>
                 <p className="text-xs text-green-600">
                   Create an account to sync across devices and save your progress online.
@@ -150,7 +150,7 @@ export default function Dashboard() {
                     </button>
                   </div>
                   <div className="mt-6 text-sm text-gray-500">
-                    💡 <strong>Tip:</strong> Your first pitch doesn't need to be perfect - we're here to help you improve!
+                    💡 <strong>Tip:</strong> Your first pitch doesn&apos;t need to be perfect - we&apos;re here to help you improve!
                   </div>
                 </div>
               </div>

@@ -89,7 +89,7 @@ const QuickOnboarding: React.FC<QuickOnboardingProps> = ({ onComplete, onSkip })
               onClick={onSkip}
               className="text-gray-500"
             >
-              I'll set this up later → Skip to dashboard
+              I&apos;ll set this up later → Skip to dashboard
             </Button>
           </div>
         </CardContent>

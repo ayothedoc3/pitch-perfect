@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import Navigation from '../components/ui/Navigation';
 import SkillRadarChart from '../components/visualization/SkillRadarChart';
 import { Button } from '@/components/ui/button';
@@ -25,7 +24,7 @@ const demoAnalysis = {
     { category: 'Engagement', score: 76, previousScore: 70 }
   ],
   transcription: {
-    text: "Hello everyone, I'm excited to present our innovative startup solution that revolutionizes the market. We've identified a key problem in the industry and developed a scalable technology platform to address it. Our revenue model projects 2 million in funding for the first year with 150% growth rate.",
+    text: "Hello everyone, I&apos;m excited to present our innovative startup solution that revolutionizes the market. We&apos;ve identified a key problem in the industry and developed a scalable technology platform to address it. Our revenue model projects 2 million in funding for the first year with 150% growth rate.",
     keyPhrases: ['innovative startup solution', 'scalable technology platform', '2 million in funding', '150% growth rate']
   },
   feedback: [
@@ -35,13 +34,12 @@ const demoAnalysis = {
   ],
   improvements: [
     "Practice your conclusion to end with more impact",
-    "Reduce filler words like 'um' and 'uh'",
+    "Reduce filler words like &apos;um&apos; and &apos;uh&apos;",
     "Use more varied vocal tones to maintain engagement"
   ]
 };
 
 const DemoPage: React.FC = () => {
-  const router = useRouter();
   const [currentView, setCurrentView] = useState<'overview' | 'analysis' | 'feedback'>('overview');
 
   return (
@@ -61,8 +59,8 @@ const DemoPage: React.FC = () => {
           </p>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8 max-w-2xl mx-auto">
             <p className="text-blue-800">
-              📹 <strong>Demo Scenario:</strong> You've just recorded a 2-minute startup pitch. 
-              Here's the AI analysis and feedback you'd receive.
+              📹 <strong>Demo Scenario:</strong> You&apos;ve just recorded a 2-minute startup pitch. 
+              Here&apos;s the AI analysis and feedback you&apos;d receive.
             </p>
           </div>
         </div>
@@ -82,7 +80,7 @@ const DemoPage: React.FC = () => {
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
-                onClick={() => setCurrentView(tab.id as any)}
+                onClick={() => setCurrentView(tab.id as 'overview' | 'analysis' | 'feedback')}
               >
                 {tab.label}
               </button>
