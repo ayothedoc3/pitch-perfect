@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import OnboardingFlow from '../components/onboarding/OnboardingFlow';
+import QuickOnboarding from '../components/onboarding/QuickOnboarding';
 import DebugPanel from '../components/debug/DebugPanel';
 import { usePitchStore, UserProfile } from '../stores/pitchStore';
 import { Button } from '@/components/ui/button';
@@ -28,9 +28,30 @@ const HomePage: React.FC = () => {
       currentStreak: 0,
       preferences: {
         pitchType: responses.find(r => r.questionId === 'pitch-type')?.answer || 'Startup Pitch',
-        experienceLevel: responses.find(r => r.questionId === 'experience-level')?.answer || 'Beginner',
-        improvementGoals: responses.find(r => r.questionId === 'improvement-goals')?.answer ? [responses.find(r => r.questionId === 'improvement-goals')!.answer] : [],
-        practiceFrequency: responses.find(r => r.questionId === 'practice-frequency')?.answer || 'Weekly',
+        experienceLevel: responses.find(r => r.questionId === 'experience-level')?.answer || 'Complete beginner',
+        improvementGoals: ['Getting started'],
+        practiceFrequency: 'Weekly',
+      },
+    };
+
+    setUserProfile(profile as UserProfile);
+    setShowOnboarding(false);
+    router.push('/dashboard');
+  };
+
+  const handleOnboardingSkip = () => {
+    // Create minimal user profile for skipped onboarding
+    const profile = {
+      name: 'User',
+      level: 'beginner',
+      totalPitches: 0,
+      totalFeedback: 0,
+      currentStreak: 0,
+      preferences: {
+        pitchType: 'Startup Pitch',
+        experienceLevel: 'Complete beginner',
+        improvementGoals: ['Getting started'],
+        practiceFrequency: 'Weekly',
       },
     };
 
@@ -43,7 +64,10 @@ const HomePage: React.FC = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 py-8">
         <div className="max-w-4xl mx-auto px-4">
-          <OnboardingFlow onComplete={handleOnboardingComplete} />
+          <QuickOnboarding 
+            onComplete={handleOnboardingComplete} 
+            onSkip={handleOnboardingSkip}
+          />
         </div>
       </div>
     );
@@ -65,17 +89,23 @@ const HomePage: React.FC = () => {
                 <Link href="/dashboard">Go to Dashboard</Link>
               </Button>
             ) : (
-              <Button 
-                size="lg" 
-                className="text-lg"
-                onClick={() => {
-                  setShowOnboarding(true);
-                }}
-              >
-                Get Started
-              </Button>
+              <>
+                <Button asChild size="lg" className="text-lg">
+                  <Link href="/demo">Try Demo</Link>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="text-lg"
+                  onClick={() => {
+                    setShowOnboarding(true);
+                  }}
+                >
+                  Get Started
+                </Button>
+              </>
             )}
-            <Button variant="outline" size="lg" className="text-lg">
+            <Button variant="ghost" size="lg" className="text-lg">
               Learn More
             </Button>
           </div>
