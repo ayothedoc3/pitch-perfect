@@ -45,7 +45,7 @@ const DemoPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
       <Head>
-        <title>Demo | PitchBuddy - See How It Works</title>
+        <title>Learn More | PitchBuddy - See How It Works</title>
       </Head>
       
       <Navigation />
@@ -53,9 +53,9 @@ const DemoPage: React.FC = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">See PitchBuddy in Action</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">How PitchBuddy Works</h1>
           <p className="text-xl text-gray-600 mb-6">
-            This demo shows you exactly what happens after you record a pitch
+            See exactly what happens when you record a pitch and get AI-powered feedback
           </p>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8 max-w-2xl mx-auto">
             <p className="text-blue-800">

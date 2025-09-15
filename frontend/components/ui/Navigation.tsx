@@ -80,7 +80,6 @@ const Navigation: React.FC = () => {
                     {userProfile?.name?.[0] || 'U'}
                   </div>
                   <span className="text-sm">{userProfile?.name || 'User'}</span>
-                  <div className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full ml-1">Demo</div>
                   <svg className={`w-4 h-4 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
@@ -91,15 +90,8 @@ const Navigation: React.FC = () => {
                     <div className="px-4 py-2 text-sm text-gray-700 border-b">
                       <div className="font-medium">{userProfile?.name || 'User'}</div>
                       <div className="text-gray-500">{userProfile?.level || 'beginner'} level</div>
-                      <div className="text-xs text-green-600 mt-1">✨ Demo Mode - Data saved locally</div>
                     </div>
                     <div className="py-1">
-                      <button
-                        onClick={() => {/* TODO: Add account upgrade */}}
-                        className="block w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 transition-colors"
-                      >
-                        💾 Create Account (Save Online)
-                      </button>
                       <button
                         onClick={handleLogout}
                         className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
@@ -114,7 +106,7 @@ const Navigation: React.FC = () => {
               /* No Profile - Show Get Started */
               <div className="flex items-center space-x-3">
                 <Link href="/demo" className="text-gray-600 hover:text-gray-900 text-sm font-medium">
-                  View Demo
+                  Learn More
                 </Link>
                 <Link href="/" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
                   Get Started

@@ -89,24 +89,18 @@ const HomePage: React.FC = () => {
                 <Link href="/dashboard">Go to Dashboard</Link>
               </Button>
             ) : (
-              <>
-                <Button asChild size="lg" className="text-lg">
-                  <Link href="/demo">Try Demo</Link>
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="lg" 
-                  className="text-lg"
-                  onClick={() => {
-                    setShowOnboarding(true);
-                  }}
-                >
-                  Get Started
-                </Button>
-              </>
+              <Button 
+                size="lg" 
+                className="text-lg"
+                onClick={() => {
+                  setShowOnboarding(true);
+                }}
+              >
+                Get Started
+              </Button>
             )}
-            <Button variant="ghost" size="lg" className="text-lg">
-              Learn More
+            <Button variant="outline" asChild size="lg" className="text-lg">
+              <Link href="/demo">Learn More</Link>
             </Button>
           </div>
           
