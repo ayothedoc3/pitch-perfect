@@ -1,0 +1,37 @@
+[build]
+cmd = '''
+npm ci --production=false && 
+cd frontend && 
+npm ci --production=false && 
+npm run build
+'''
+
+[start]
+cmd = "cd frontend && npm start"
+
+[variables]
+NODE_ENV = "production"
+NIXPACKS_NODE_VERSION = "18"
+
+[phases.setup]
+nixPkgs = ["nodejs-18_x", "npm-9_x"]
+
+[phases.install]
+dependsOn = ["setup"]
+cmd = '''
+npm config set fetch-retry-mintimeout 20000 &&
+npm config set fetch-retry-maxtimeout 120000 &&
+npm config set fetch-retries 5 &&
+npm ci --no-audit --production=false
+'''
+
+[phases.build]
+dependsOn = ["install"] 
+cmd = '''
+cd frontend &&
+npm config set fetch-retry-mintimeout 20000 &&
+npm config set fetch-retry-maxtimeout 120000 &&
+npm config set fetch-retries 5 &&
+npm ci --no-audit --production=false &&
+npm run build
+'''

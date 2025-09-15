@@ -77,7 +77,16 @@
 
 ## Troubleshooting
 
-- Check Coolify logs for build/deployment errors
+- **Network timeouts during npm install**: The project now includes a nixpacks.toml configuration with retry settings to handle network issues during dependency installation
+- **Build failures**: Try the "Option 1" deployment method (separate services) if the monorepo build continues to fail
+- Check Coolify logs for build/deployment errors  
 - Verify all environment variables are set correctly
 - Ensure domains are properly configured and pointing to Coolify
 - Check that the OpenAI API key is valid if AI features aren't working
+
+## Recent Fixes
+
+- Added nixpacks.toml configuration for more reliable builds
+- Improved Dockerfile with network retry settings
+- Enhanced .dockerignore to reduce build context
+- Fixed development environment startup issues
