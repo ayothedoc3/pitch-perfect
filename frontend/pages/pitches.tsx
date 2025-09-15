@@ -19,8 +19,8 @@ export default function PitchesPage() {
 
   const handleRecordingComplete = (pitchId: string) => {
     setShowRecorder(false);
-    // Navigate to the pitch detail page
-    router.push(`/pitch/${pitchId}`);
+    // Navigate to the processing page first
+    router.push(`/pitch/${pitchId}/processing`);
   };
 
   // Use only real pitches from store

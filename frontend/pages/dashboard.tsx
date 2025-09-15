@@ -40,6 +40,34 @@ export default function Dashboard() {
       
       <Navigation />
       
+      {/* Demo Mode Banner */}
+      <div className="bg-gradient-to-r from-green-50 to-blue-50 border-b border-green-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-green-800">
+                  You're in Demo Mode! Your data is saved locally and will work offline.
+                </p>
+                <p className="text-xs text-green-600">
+                  Create an account to sync across devices and save your progress online.
+                </p>
+              </div>
+            </div>
+            <button className="bg-white text-green-700 border border-green-300 px-3 py-1 rounded text-sm font-medium hover:bg-green-50">
+              Create Account
+            </button>
+          </div>
+        </div>
+      </div>
+      
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
