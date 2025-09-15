@@ -45,13 +45,14 @@ export class SpeechAnalysisService {
   ];
 
   constructor() {
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error('OPENAI_API_KEY environment variable is required');
+    if (process.env.OPENAI_API_KEY) {
+      this.openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+    } else {
+      logger.warn('OPENAI_API_KEY not found - running in mock mode for development');
+      this.openai = null as any; // Will use mock responses
     }
-    
-    this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
   }
 
   async analyzeComplete(audioFilePath: string, videoDuration: number): Promise<AnalysisResult> {
@@ -86,6 +87,27 @@ export class SpeechAnalysisService {
 
   async transcribe(audioFilePath: string): Promise<TranscriptionResult> {
     try {
+      // Use mock data if OpenAI is not available
+      if (!this.openai) {
+        logger.info('Using mock transcription data for development');
+        const mockText = "Hello everyone, I'm excited to present our innovative startup solution that revolutionizes the market. We've identified a key problem in the industry and developed a scalable technology platform to address it. Our revenue model projects 2 million in funding for the first year with 150% growth rate.";
+        
+        const words = mockText.split(' ');
+        const timestamps = words.map((word, index) => ({
+          word,
+          start: index * 0.5,
+          end: (index + 1) * 0.5
+        }));
+
+        const keyPhrases = this.extractKeyPhrases(mockText);
+        
+        return {
+          text: mockText,
+          timestamps,
+          keyPhrases,
+        };
+      }
+
       logger.info('Transcribing audio with OpenAI Whisper');
       
       const audioFile = fs.createReadStream(audioFilePath);

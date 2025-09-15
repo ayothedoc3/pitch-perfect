@@ -29,7 +29,7 @@ app.use(helmet());
 app.use(compression());
 app.use(limiter);
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: process.env.FRONTEND_URL || 'http://localhost:3001',
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
@@ -77,14 +77,23 @@ app.use('*', (req, res) => {
 // Start server
 async function startServer() {
   try {
-    // Test database connection
-    await prisma.$connect();
-    logger.info('Database connected successfully');
+    // Try to connect to database, but don't fail if unavailable in development
+    if (process.env.NODE_ENV === 'production') {
+      await prisma.$connect();
+      logger.info('Database connected successfully');
+    } else {
+      try {
+        await prisma.$connect();
+        logger.info('Database connected successfully');
+      } catch (dbError) {
+        logger.warn('Database connection failed - running without database for development:', dbError);
+      }
+    }
     
     app.listen(PORT, () => {
       logger.info(`Server running on port ${PORT}`);
       logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-      logger.info(`Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`);
+      logger.info(`Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3001'}`);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);
