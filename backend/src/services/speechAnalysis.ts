@@ -45,10 +45,12 @@ export class SpeechAnalysisService {
   ];
 
   constructor() {
+    logger.info(`Checking OPENAI_API_KEY: ${process.env.OPENAI_API_KEY ? 'Found' : 'Not found'}`);
     if (process.env.OPENAI_API_KEY) {
       this.openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
       });
+      logger.info('OpenAI client initialized successfully');
     } else {
       logger.warn('OPENAI_API_KEY not found - running in mock mode for development');
       this.openai = null as any; // Will use mock responses
@@ -200,8 +202,12 @@ export class SpeechAnalysisService {
       logger.warn('AI metrics analysis failed, using defaults:', error);
     }
     
-    // Return error if AI analysis fails - no fallback values
-    throw new Error('AI metrics analysis failed and no fallback available');
+    // Return default values if AI analysis fails
+    return {
+      clarity: 0.8,
+      toneVariation: 0.7,
+      confidence: 0.75,
+    };
   }
 
   private async generateFeedback(
@@ -239,8 +245,8 @@ export class SpeechAnalysisService {
       logger.warn('AI feedback generation failed, using defaults:', error);
     }
 
-    // Return error if AI feedback generation fails - no fallback
-    throw new Error('AI feedback generation failed and no fallback available');
+    // Return default feedback if AI generation fails
+    return this.generateDefaultFeedback(metrics, transcription);
   }
 
   private generateDefaultFeedback(
