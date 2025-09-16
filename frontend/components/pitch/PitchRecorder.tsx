@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import { usePitchStore } from '../../stores/pitchStore';
 import { SpeechAnalysisService } from '../../services/analysis/SpeechAnalysisService';
@@ -30,8 +30,29 @@ const PitchRecorder: React.FC<PitchRecorderProps> = ({
   const [countdown, setCountdown] = useState<number>(3);
   const [elapsedTime, setElapsedTime] = useState<number>(0);
   const [isCountingDown, setIsCountingDown] = useState<boolean>(false);
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
+  const [recordedVideoUrl, setRecordedVideoUrl] = useState<string>('');
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  
+
+  // Load available cameras on mount
+  useEffect(() => {
+    const loadDevices = async () => {
+      try {
+        const mediaDevices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = mediaDevices.filter(device => device.kind === 'videoinput');
+        setDevices(videoDevices);
+        if (videoDevices.length > 0 && !selectedDeviceId) {
+          setSelectedDeviceId(videoDevices[0].deviceId);
+        }
+      } catch (error) {
+        console.error('Error loading media devices:', error);
+      }
+    };
+
+    loadDevices();
+  }, [selectedDeviceId]);
+
   const handleDataAvailable = useCallback(({ data }: BlobEvent) => {
     if (data.size > 0) {
       setRecordedChunks((prev) => [...prev, data]);
@@ -42,14 +63,28 @@ const PitchRecorder: React.FC<PitchRecorderProps> = ({
     if (mediaRecorderRef.current) {
       mediaRecorderRef.current.stop();
     }
-    
+
     setCapturing(false);
-    
+
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
   }, []);
+
+  // Create video URL when recording chunks are available
+  useEffect(() => {
+    if (recordedChunks.length > 0 && !recordedVideoUrl) {
+      const blob = new Blob(recordedChunks, { type: 'video/webm' });
+      const url = URL.createObjectURL(blob);
+      setRecordedVideoUrl(url);
+
+      // Cleanup URL on unmount
+      return () => {
+        URL.revokeObjectURL(url);
+      };
+    }
+  }, [recordedChunks, recordedVideoUrl]);
   
   const startRecording = useCallback(() => {
     setCapturing(true);
@@ -78,9 +113,15 @@ const PitchRecorder: React.FC<PitchRecorderProps> = ({
   }, [maxDuration, handleDataAvailable, handleStopCaptureClick]);
 
   const handleStartCaptureClick = useCallback(() => {
+    // Reset video URL
+    if (recordedVideoUrl) {
+      URL.revokeObjectURL(recordedVideoUrl);
+      setRecordedVideoUrl('');
+    }
+
     setIsCountingDown(true);
     setCountdown(3);
-    
+
     const countdownInterval = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
@@ -92,42 +133,92 @@ const PitchRecorder: React.FC<PitchRecorderProps> = ({
         return prev - 1;
       });
     }, 1000);
-  }, [startRecording]);
+  }, [startRecording, recordedVideoUrl]);
 
   const analyzeRecording = useCallback(async (pitchId: string, videoBlob: Blob) => {
     try {
-      
-      // Extract audio from video (in real implementation)
-      const audioBlob = await analysisService.extractAudioFromVideo(videoBlob);
-      
-      // Perform complete analysis
-      const analysisResult = await analysisService.analyzeComplete(audioBlob, elapsedTime);
-      
-      // Update pitch with analysis results
-      updatePitch(pitchId, {
-        analysis: {
-          overallScore: analysisResult.overallScore,
-          metrics: analysisResult.metrics,
-          skillBreakdown: analysisResult.skillBreakdown,
-          feedback: analysisResult.feedback,
-          improvements: analysisResult.improvements,
-        },
-        transcription: analysisResult.transcription,
-        progress: 100, // Analysis complete
+      // Import API functions
+      const { pitchesAPI } = await import('../../lib/api');
+
+      // Create pitch in backend
+      const pitchData = await pitchesAPI.create({
+        title: pitchTitle,
+        type: pitchType,
+        duration: elapsedTime
       });
 
-      
+      // Upload video file to backend
+      const file = new File([videoBlob], `pitch-${pitchId}.webm`, { type: 'video/webm' });
+      await pitchesAPI.uploadFile(pitchData.pitch.id, file, (progress) => {
+        updatePitch(pitchId, { progress: progress * 0.5 }); // Upload is 50% of progress
+      });
+
+      // Poll for analysis completion
+      const pollInterval = setInterval(async () => {
+        try {
+          const status = await pitchesAPI.getStatus(pitchData.pitch.id);
+
+          if (status.status === 'completed' && status.hasAnalysis) {
+            // Get full pitch data with analysis
+            const fullPitchData = await pitchesAPI.getById(pitchData.pitch.id);
+            const pitch = fullPitchData.pitch;
+
+            // Update frontend store with backend analysis
+            updatePitch(pitchId, {
+              analysis: {
+                overallScore: pitch.analysis.overallScore,
+                metrics: {
+                  pacing: pitch.analysis.pacing,
+                  clarity: pitch.analysis.clarity,
+                  fillerWordFrequency: pitch.analysis.fillerWordFrequency,
+                  toneVariation: pitch.analysis.toneVariation,
+                  confidence: pitch.analysis.confidence,
+                },
+                skillBreakdown: pitch.analysis.skillBreakdown,
+                feedback: pitch.analysis.feedback,
+                improvements: pitch.analysis.improvements,
+              },
+              transcription: {
+                text: pitch.transcription.text,
+                timestamps: pitch.transcription.timestamps,
+                keyPhrases: pitch.transcription.keyPhrases,
+              },
+              progress: 100, // Analysis complete
+            });
+
+            clearInterval(pollInterval);
+            setAnalyzing(false);
+          } else if (status.status === 'failed') {
+            throw new Error('Backend analysis failed');
+          } else {
+            // Update progress for ongoing analysis
+            updatePitch(pitchId, { progress: 50 + (status.progress || 0) * 0.5 });
+          }
+        } catch (pollError) {
+          console.error('Polling error:', pollError);
+          clearInterval(pollInterval);
+          throw pollError;
+        }
+      }, 2000); // Poll every 2 seconds
+
+      // Set timeout to avoid infinite polling
+      setTimeout(() => {
+        clearInterval(pollInterval);
+        if (isAnalyzing) {
+          throw new Error('Analysis timeout');
+        }
+      }, 120000); // 2 minutes timeout
+
     } catch (error) {
       console.error('Analysis failed:', error);
-      
+
       // Update pitch with error state
       updatePitch(pitchId, {
         progress: -1, // Indicates analysis failed
       });
-    } finally {
       setAnalyzing(false);
     }
-  }, [analysisService, elapsedTime, updatePitch, setAnalyzing]);
+  }, [pitchTitle, pitchType, elapsedTime, updatePitch, setAnalyzing, isAnalyzing]);
   
   const handleSave = useCallback(async () => {
     if (recordedChunks.length > 0) {
@@ -151,7 +242,13 @@ const PitchRecorder: React.FC<PitchRecorderProps> = ({
         
         // Clear recorded chunks
         setRecordedChunks([]);
-        
+
+        // Clear video URL
+        if (recordedVideoUrl) {
+          URL.revokeObjectURL(recordedVideoUrl);
+          setRecordedVideoUrl('');
+        }
+
         // Notify parent component
         onRecordingComplete(pitchId);
         
@@ -174,19 +271,55 @@ const PitchRecorder: React.FC<PitchRecorderProps> = ({
   return (
     <Card>
       <CardContent className="p-6">
+        {/* Camera Selection */}
+        {devices.length > 1 && (
+          <div className="mb-4">
+            <label htmlFor="camera-select" className="block text-sm font-medium text-gray-700 mb-2">
+              Select Camera:
+            </label>
+            <select
+              id="camera-select"
+              value={selectedDeviceId}
+              onChange={(e) => setSelectedDeviceId(e.target.value)}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              disabled={capturing || isCountingDown}
+            >
+              {devices.map((device) => (
+                <option key={device.deviceId} value={device.deviceId}>
+                  {device.label || `Camera ${device.deviceId.slice(0, 8)}`}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div className="relative">
-          <Webcam
-            audio={true}
-            ref={webcamRef}
-            className="w-full rounded-lg aspect-video"
-          />
-          
+          {recordedVideoUrl && !capturing && !isCountingDown ? (
+            // Show recorded video preview
+            <video
+              src={recordedVideoUrl}
+              controls
+              className="w-full rounded-lg aspect-video"
+              style={{ maxHeight: '400px' }}
+            />
+          ) : (
+            // Show live webcam
+            <Webcam
+              audio={true}
+              ref={webcamRef}
+              className="w-full rounded-lg aspect-video"
+              videoConstraints={{
+                deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined,
+              }}
+            />
+          )}
+
           {isCountingDown && (
             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
               <div className="text-6xl font-bold text-white">{countdown}</div>
             </div>
           )}
-          
+
           {capturing && (
             <div className="absolute top-3 right-3 flex items-center space-x-2 bg-black bg-opacity-70 rounded-lg px-3 py-1">
               <div className="h-3 w-3 rounded-full bg-red-600 animate-pulse"></div>
