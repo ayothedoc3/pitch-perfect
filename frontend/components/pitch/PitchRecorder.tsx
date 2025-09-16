@@ -1,7 +1,6 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import { usePitchStore } from '../../stores/pitchStore';
-import { SpeechAnalysisService } from '../../services/analysis/SpeechAnalysisService';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
 
@@ -21,8 +20,6 @@ const PitchRecorder: React.FC<PitchRecorderProps> = ({
   // Store hooks
   const { addPitch, updatePitch, setRecording, setAnalyzing, isAnalyzing } = usePitchStore();
   
-  // Analysis service
-  const analysisService = useRef(new SpeechAnalysisService()).current;
   const webcamRef = useRef<Webcam>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const [capturing, setCapturing] = useState(false);
@@ -257,7 +254,7 @@ const PitchRecorder: React.FC<PitchRecorderProps> = ({
         alert('Error saving pitch. Please try again.');
       }
     }
-  }, [recordedChunks, pitchTitle, pitchType, elapsedTime, addPitch, setRecording, setAnalyzing, onRecordingComplete, analyzeRecording]);
+  }, [recordedChunks, pitchTitle, pitchType, elapsedTime, addPitch, setRecording, setAnalyzing, onRecordingComplete, analyzeRecording, recordedVideoUrl]);
   
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
