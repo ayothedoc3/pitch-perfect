@@ -148,7 +148,7 @@ export default function PitchesPage() {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {sortedPitches.map((pitch) => (
-            <PitchCard key={pitch.id} pitch={pitch} />
+            <PitchCard key={pitch.id} {...pitch} />
           ))}
         </div>
       </main>

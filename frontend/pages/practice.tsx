@@ -10,11 +10,11 @@ const PitchPracticePage: React.FC = () => {
   const router = useRouter();
   const upsertPitch = usePitchStore((state) => state.upsertPitch);
 
-  const serviceRef = useRef<SpeechUploadService>();
-  if (!serviceRef.current) {
+  const serviceRef = useRef<SpeechUploadService | null>(null);
+  if (serviceRef.current === null) {
     serviceRef.current = speechUploadServiceFactory();
   }
-  const speechUploadService = serviceRef.current;
+  const speechUploadService = serviceRef.current!;
 
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
