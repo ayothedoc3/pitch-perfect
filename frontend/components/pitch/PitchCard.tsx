@@ -5,21 +5,30 @@ import Image from 'next/image';
 interface PitchCardProps {
   id: string;
   title: string;
-  type: 'startup' | 'elevator' | 'sales';
-  duration: number; // in seconds
-  feedbackCount: number;
-  dateRecorded: string;
-  thumbnailUrl?: string;
-  progress?: number; // 0-100
+  type?: string;
+  duration: number;
+  feedbackCount?: number;
+  dateRecorded?: string;
+  createdAt?: string;
+  thumbnailUrl?: string | null;
+  videoUrl?: string | null;
+  progress?: number;
 }
+
+const TYPE_COLORS: Record<string, string> = {
+  startup: 'bg-purple-100 text-purple-800',
+  elevator: 'bg-green-100 text-green-800',
+  sales: 'bg-blue-100 text-blue-800',
+};
 
 const PitchCard: React.FC<PitchCardProps> = ({
   id,
   title,
   type,
   duration,
-  feedbackCount,
+  feedbackCount = 0,
   dateRecorded,
+  createdAt,
   thumbnailUrl,
   progress = 0,
 }) => {
@@ -28,20 +37,20 @@ const PitchCard: React.FC<PitchCardProps> = ({
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
-  
-  const typeColors = {
-    startup: 'bg-purple-100 text-purple-800',
-    elevator: 'bg-green-100 text-green-800',
-    sales: 'bg-blue-100 text-blue-800',
-  };
-  
+
+  const normalizedType = (type ?? 'startup').toLowerCase();
+  const typeBadgeClass = TYPE_COLORS[normalizedType] ?? 'bg-gray-100 text-gray-800';
+  const typeLabel = `${normalizedType.charAt(0).toUpperCase()}${normalizedType.slice(1)}`;
+
+  const recordedDate = dateRecorded ?? createdAt ?? new Date().toISOString();
+
   return (
     <div className="card hover:shadow-lg transition-shadow">
       <div className="relative aspect-video bg-gray-100 rounded-md mb-4 overflow-hidden">
         {thumbnailUrl ? (
-          <Image 
-            src={thumbnailUrl} 
-            alt={title} 
+          <Image
+            src={thumbnailUrl}
+            alt={title}
             fill
             className="object-cover"
           />
@@ -56,32 +65,32 @@ const PitchCard: React.FC<PitchCardProps> = ({
           {formatDuration(duration)}
         </div>
       </div>
-      
+
       <h3 className="font-semibold text-lg mb-1 truncate">{title}</h3>
-      
+
       <div className="flex items-center space-x-2 mb-3">
-        <span className={`text-xs px-2 py-1 rounded-full ${typeColors[type]}`}>
-          {type.charAt(0).toUpperCase() + type.slice(1)} Pitch
+        <span className={`text-xs px-2 py-1 rounded-full ${typeBadgeClass}`}>
+          {typeLabel} Pitch
         </span>
         <span className="text-xs text-gray-500">
-          {new Date(dateRecorded).toLocaleDateString()}
+          {new Date(recordedDate).toLocaleDateString()}
         </span>
       </div>
-      
+
       {progress > 0 && (
         <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
-          <div 
-            className="bg-blue-600 h-2 rounded-full" 
+          <div
+            className="bg-blue-600 h-2 rounded-full"
             style={{ width: `${progress}%` }}
-          ></div>
+          />
         </div>
       )}
-      
+
       <div className="flex justify-between items-center">
         <div className="text-sm text-gray-500">
           <span className="font-medium text-gray-700">{feedbackCount}</span> feedback
         </div>
-        
+
         <Link href={`/pitch/${id}`} className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded text-sm">
           View Details
         </Link>

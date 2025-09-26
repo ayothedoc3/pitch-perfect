@@ -28,10 +28,8 @@ PitchBuddy is an AI-powered platform designed to help users practice, receive fe
     -   `_document.js`: Custom Document component in Next.js.
     -   `dashboard.tsx`: Dashboard page.
 -   `services/`: Directory containing services.
-    -   `analysis/`: Contains analysis-related services.
-        -   `SpeechAnalysisService.ts`: Service for analyzing speech.
+    -   `analysis/`: Backend analysis utilities (see `backend/src/services/speechAnalysis.ts`).
 -   `styles/`: Directory containing CSS styles.
-    -   `globals.css`: Global CSS styles.
 
 ## Dependencies
 

@@ -12,10 +12,56 @@ import authRoutes from './routes/auth';
 import pitchRoutes from './routes/pitches';
 
 // Load environment variables
-dotenv.config();
+import fs from 'fs';
+
+// First try to load from backend/.env
+const envPath = path.join(__dirname, '../.env');
+if (fs.existsSync(envPath)) {
+  dotenv.config({ path: envPath });
+  console.log('Loaded .env from backend directory');
+} else {
+  console.log('.env file not found at:', envPath);
+}
+
+// Debug environment loading
+console.log('Environment check:', {
+  NODE_ENV: process.env.NODE_ENV,
+  NODE_ENV_TRIMMED: process.env.NODE_ENV?.trim(),
+  PORT: process.env.PORT,
+  OPENAI_API_KEY_EXISTS: !!process.env.OPENAI_API_KEY,
+  OPENAI_API_KEY_LENGTH: process.env.OPENAI_API_KEY?.length || 0,
+  ENV_PATH: envPath,
+  ENV_EXISTS: fs.existsSync(envPath)
+});
+
+// Trim NODE_ENV if it has extra spaces
+if (process.env.NODE_ENV) {
+  process.env.NODE_ENV = process.env.NODE_ENV.trim();
+}
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3011;
+
+const rawCorsOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.FRONTEND_URLS,
+  process.env.CORS_ALLOWED_ORIGINS,
+  'http://localhost:3000',
+  'http://localhost:3003',
+  'http://localhost:3004'
+].filter(Boolean) as string[];
+
+const allowedOrigins: string[] = Array.from(
+  new Set(
+    rawCorsOrigins
+      .flatMap(originList => originList.split(','))
+      .map(origin => origin.trim())
+      .filter(origin => origin.length > 0)
+  )
+);
+
+logger.info('Configured CORS origins', { origins: allowedOrigins });
+
 
 // Rate limiting
 const limiter = rateLimit({
@@ -24,12 +70,30 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.'
 });
 
-// Middleware
+// Middleware - Updated CORS config
 app.use(helmet());
 app.use(compression());
 app.use(limiter);
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3001',
+  origin: (origin, callback) => {
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+
+    if (allowedOrigins.includes('*')) {
+      callback(null, true);
+      return;
+    }
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    logger.warn(`Blocked CORS origin: ${origin}`);
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
@@ -102,3 +166,9 @@ async function startServer() {
 }
 
 startServer();
+
+
+
+
+
+

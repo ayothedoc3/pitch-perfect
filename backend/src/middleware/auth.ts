@@ -17,6 +17,24 @@ export const authenticateToken = async (
   next: NextFunction
 ): Promise<void> => {
   try {
+    // Development bypass - skip authentication if no database is available
+    if (process.env.NODE_ENV === 'development') {
+      try {
+        // Test database connection quickly
+        await prisma.$queryRaw`SELECT 1`;
+      } catch (dbError) {
+        // Database not available, bypass authentication
+        logger.warn('Database not available, bypassing authentication for development');
+        req.user = {
+          id: 'dev-user-123',
+          email: 'dev@example.com',
+          name: 'Development User'
+        };
+        next();
+        return;
+      }
+    }
+
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1];
 
@@ -26,7 +44,7 @@ export const authenticateToken = async (
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-    
+
     // Verify the session exists in the database
     const session = await prisma.session.findUnique({
       where: { token },

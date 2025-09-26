@@ -5,13 +5,15 @@ import Navigation from '../components/ui/Navigation';
 import PitchCard from '../components/pitch/PitchCard';
 import SkillRadarChart from '../components/visualization/SkillRadarChart';
 import { usePitchStore } from '../stores/pitchStore';
+import withAuth from '../components/auth/withAuth';
 
 // No sample data - dashboard now shows only real user data
 
 
-export default function Dashboard() {
+function Dashboard() {
   const router = useRouter();
-  const { getRecentPitches, getUserStats } = usePitchStore();
+  const getRecentPitches = usePitchStore((state) => state.getRecentPitches);
+  const getUserStats = usePitchStore((state) => state.getUserStats);
   const [activeTab, setActiveTab] = useState('overview');
 
   // Get real data from store
@@ -112,17 +114,17 @@ export default function Dashboard() {
                       onClick={() => router.push('/pitches')}
                       className="w-full bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium"
                     >
-                      🎥 Record Your First Pitch
+                      ðŸŽ¥ Record Your First Pitch
                     </button>
                     <button 
                       onClick={() => router.push('/demo')}
                       className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium"
                     >
-                      📚 Learn How It Works
+                      ðŸ“š Learn How It Works
                     </button>
                   </div>
                   <div className="mt-6 text-sm text-gray-500">
-                    💡 <strong>Tip:</strong> Your first pitch doesn&apos;t need to be perfect - we&apos;re here to help you improve!
+                    ðŸ’¡ <strong>Tip:</strong> Your first pitch doesn&apos;t need to be perfect - we&apos;re here to help you improve!
                   </div>
                 </div>
               </div>
@@ -199,7 +201,7 @@ export default function Dashboard() {
                   <>
                     <div className="flex items-center p-3 bg-blue-50 rounded-md">
                       <div className="h-8 w-8 rounded bg-blue-100 flex items-center justify-center text-blue-600">
-                        <span className="text-lg">1️⃣</span>
+                        <span className="text-lg">1ï¸âƒ£</span>
                       </div>
                       <div className="ml-3">
                         <p className="text-sm font-medium text-gray-900">Record a practice pitch</p>
@@ -209,7 +211,7 @@ export default function Dashboard() {
                     
                     <div className="flex items-center p-3 bg-green-50 rounded-md">
                       <div className="h-8 w-8 rounded bg-green-100 flex items-center justify-center text-green-600">
-                        <span className="text-lg">2️⃣</span>
+                        <span className="text-lg">2ï¸âƒ£</span>
                       </div>
                       <div className="ml-3">
                         <p className="text-sm font-medium text-gray-900">Get AI feedback</p>
@@ -219,7 +221,7 @@ export default function Dashboard() {
                     
                     <div className="flex items-center p-3 bg-purple-50 rounded-md">
                       <div className="h-8 w-8 rounded bg-purple-100 flex items-center justify-center text-purple-600">
-                        <span className="text-lg">3️⃣</span>
+                        <span className="text-lg">3ï¸âƒ£</span>
                       </div>
                       <div className="ml-3">
                         <p className="text-sm font-medium text-gray-900">Practice & improve</p>
@@ -263,3 +265,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
+export default withAuth(Dashboard);

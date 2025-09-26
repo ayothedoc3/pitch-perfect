@@ -44,10 +44,10 @@ This is a monorepo containing both frontend (Next.js) and backend (Express) appl
 - **File Upload** - Multer-based file handling for pitch recordings
 
 ### Services Layer
-- **SpeechAnalysisService** (`frontend/services/analysis/SpeechAnalysisService.ts`) - Core AI analysis service that provides:
-  - Speech transcription with timestamps
-  - Metrics calculation (pacing, clarity, filler words, tone variation, confidence)
-  - Feedback generation based on analysis results
+- **SpeechAnalysisService** (`backend/src/services/speechAnalysis.ts`) - Runs whisper transcription and speech metrics server-side.
+  - Persists verbatim transcripts, timestamps, and key phrases
+  - Calculates pacing, clarity, filler words, tone variation, and confidence
+  - Generates feedback/improvement data consumed by the frontend
   - Currently contains placeholder/mock implementations ready for real AI integration
 
 ### Key Technology Stack
@@ -60,7 +60,7 @@ This is a monorepo containing both frontend (Next.js) and backend (Express) appl
 
 ### Data Flow
 1. User records pitch via PitchRecorder component
-2. Audio/video blob passed to SpeechAnalysisService for processing
+2. Upload stored to backend where the SpeechAnalysisService processes the media (transcription + metrics)
 3. Analysis results displayed through Dashboard and SkillRadarChart
 4. Metrics stored for progress tracking and comparison
 
@@ -71,6 +71,6 @@ This is a monorepo containing both frontend (Next.js) and backend (Express) appl
 
 ## Development Notes
 
-The application is structured for AI-powered speech analysis but currently uses placeholder implementations. When implementing real AI features, focus on the SpeechAnalysisService interfaces which define the expected data structures for transcription and metrics.
+The application now relies on the backend SpeechAnalysisService for real transcription and metrics while the frontend simply polls for results.
 
 The project uses a pages-based routing structure with a custom _app.tsx that imports global CSS styles.

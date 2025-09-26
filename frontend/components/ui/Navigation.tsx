@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { usePitchStore } from '../../stores/pitchStore';
+import { useAuth } from '../../contexts/AuthContext';
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard' },
@@ -13,17 +13,12 @@ const navItems = [
 
 const Navigation: React.FC = () => {
   const router = useRouter();
-  const { userProfile, setUserProfile } = usePitchStore();
+  const { user, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = () => {
-    // Clear user profile and all pitches to restart onboarding
-    setUserProfile(null);
-    // Also clear localStorage
-    localStorage.removeItem('pitchbuddy-storage');
-    // Redirect to home page
-    router.push('/');
+    logout();
     setShowUserMenu(false);
   };
 
@@ -69,17 +64,17 @@ const Navigation: React.FC = () => {
             </div>
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:items-center space-x-4">
-            {userProfile ? (
-              /* Existing User Menu */
+            {user ? (
+              /* Authenticated User Menu */
               <div className="ml-3 relative" ref={menuRef}>
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className="flex items-center space-x-2 h-9 px-3 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-800 font-medium transition-colors"
                 >
                   <div className="h-6 w-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm">
-                    {userProfile?.name?.[0] || 'U'}
+                    {user?.name?.[0] || user?.email?.[0] || 'U'}
                   </div>
-                  <span className="text-sm">{userProfile?.name || 'User'}</span>
+                  <span className="text-sm">{user?.name || 'User'}</span>
                   <svg className={`w-4 h-4 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
@@ -88,27 +83,31 @@ const Navigation: React.FC = () => {
                 {showUserMenu && (
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-50 border">
                     <div className="px-4 py-2 text-sm text-gray-700 border-b">
-                      <div className="font-medium">{userProfile?.name || 'User'}</div>
-                      <div className="text-gray-500">{userProfile?.level || 'beginner'} level</div>
+                      <div className="font-medium">{user?.name || 'User'}</div>
+                      <div className="text-gray-500">{user?.email}</div>
+                      <div className="text-gray-500">{user?.level || 'beginner'} level</div>
                     </div>
                     <div className="py-1">
                       <button
                         onClick={handleLogout}
                         className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                       >
-                        🔄 Start Over
+                        Sign Out
                       </button>
                     </div>
                   </div>
                 )}
               </div>
             ) : (
-              /* No Profile - Show Get Started */
+              /* Not Authenticated - Show Login/Signup */
               <div className="flex items-center space-x-3">
                 <Link href="/demo" className="text-gray-600 hover:text-gray-900 text-sm font-medium">
                   Learn More
                 </Link>
-                <Link href="/" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                <Link href="/login" className="text-gray-600 hover:text-gray-900 text-sm font-medium">
+                  Sign In
+                </Link>
+                <Link href="/signup" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
                   Get Started
                 </Link>
               </div>

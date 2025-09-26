@@ -37,7 +37,7 @@ router.post('/register', validate(schemas.register), async (req, res) => {
           create: {
             pitchType: 'Startup Pitch',
             experienceLevel: 'Beginner',
-            improvementGoals: [],
+            improvementGoals: JSON.stringify([]),
             practiceFrequency: 'Weekly'
           }
         }
@@ -87,6 +87,37 @@ router.post('/register', validate(schemas.register), async (req, res) => {
 // Login user
 router.post('/login', validate(schemas.login), async (req, res) => {
   try {
+    // Development bypass - auto-login if no database
+    if (process.env.NODE_ENV === 'development') {
+      try {
+        await prisma.$queryRaw`SELECT 1`;
+      } catch (dbError) {
+        logger.warn('Database not available, providing development authentication token');
+
+        // Generate a temporary JWT for development
+        const token = jwt.sign(
+          {
+            sub: 'dev-user-123',
+            email: 'dev@example.com',
+            name: 'Development User'
+          },
+          process.env.JWT_SECRET!,
+          { expiresIn: '24h' }
+        );
+
+        return res.json({
+          token,
+          user: {
+            id: 'dev-user-123',
+            email: 'dev@example.com',
+            name: 'Development User',
+            level: 'intermediate',
+            createdAt: new Date().toISOString()
+          }
+        });
+      }
+    }
+
     const { email, password } = req.body;
 
     // Find user
@@ -206,14 +237,14 @@ router.put('/preferences', authenticateToken, validate(schemas.userPreferences),
       update: {
         pitchType: pitchType || undefined,
         experienceLevel: experienceLevel || undefined,
-        improvementGoals: improvementGoals || undefined,
+        improvementGoals: improvementGoals ? JSON.stringify(improvementGoals) : undefined,
         practiceFrequency: practiceFrequency || undefined
       },
       create: {
         userId,
         pitchType: pitchType || 'Startup Pitch',
         experienceLevel: experienceLevel || 'Beginner',
-        improvementGoals: improvementGoals || [],
+        improvementGoals: improvementGoals ? JSON.stringify(improvementGoals) : JSON.stringify([]),
         practiceFrequency: practiceFrequency || 'Weekly'
       }
     });

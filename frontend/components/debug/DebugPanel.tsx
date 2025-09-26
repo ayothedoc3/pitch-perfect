@@ -6,7 +6,8 @@ interface DebugPanelProps {
 }
 
 const DebugPanel: React.FC<DebugPanelProps> = ({ show }) => {
-  const { pitches, userProfile } = usePitchStore();
+  const pitches = usePitchStore((state) => state.pitches);
+  const userProfile = usePitchStore((state) => state.userProfile);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {

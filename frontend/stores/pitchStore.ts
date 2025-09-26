@@ -1,16 +1,21 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { PitchDetail } from '../services/SpeechUploadService';
 
 export interface Pitch {
   id: string;
   title: string;
-  type: 'startup' | 'elevator' | 'sales';
+  type: 'startup' | 'elevator' | 'sales' | string;
   duration: number;
-  dateRecorded: string;
-  videoBlob?: Blob;
-  videoUrl?: string;
-  thumbnailUrl?: string;
+  dateRecorded?: string;
+  createdAt: string;
+  updatedAt: string;
+  status: 'recorded' | 'analyzing' | 'completed' | 'failed';
   progress: number;
+  videoBlob?: Blob;
+  videoUrl?: string | null;
+  audioUrl?: string | null;
+  thumbnailUrl?: string;
   transcription?: {
     text: string;
     keyPhrases: string[];
@@ -19,7 +24,7 @@ export interface Pitch {
       start: number;
       end: number;
     }>;
-  };
+  } | null;
   analysis?: {
     overallScore: number;
     metrics: {
@@ -36,7 +41,7 @@ export interface Pitch {
     }>;
     feedback: string[];
     improvements: string[];
-  };
+  } | null;
   feedbackCount: number;
 }
 
@@ -54,16 +59,46 @@ export interface UserProfile {
   };
 }
 
+export const mapPitchDetailToStorePitch = (detail: PitchDetail): Pitch => ({
+  id: detail.id,
+  title: detail.title,
+  type: detail.type,
+  duration: detail.duration,
+  dateRecorded: detail.createdAt,
+  createdAt: detail.createdAt,
+  updatedAt: detail.updatedAt,
+  status: detail.status,
+  progress: detail.progress,
+  videoUrl: detail.videoUrl ?? null,
+  audioUrl: detail.audioUrl ?? null,
+  thumbnailUrl: undefined,
+  transcription: detail.transcription
+    ? {
+        text: detail.transcription.text,
+        keyPhrases: detail.transcription.keyPhrases,
+        timestamps: detail.transcription.timestamps,
+      }
+    : null,
+  analysis: detail.analysis
+    ? {
+        overallScore: detail.analysis.overallScore,
+        metrics: detail.analysis.metrics,
+        skillBreakdown: detail.analysis.skillBreakdown,
+        feedback: detail.analysis.feedback,
+        improvements: detail.analysis.improvements,
+      }
+    : null,
+  feedbackCount: detail.analysis ? detail.analysis.feedback.length : 0,
+});
+
 interface PitchStore {
-  // State
   pitches: Pitch[];
   currentPitch: Pitch | null;
   isRecording: boolean;
   isAnalyzing: boolean;
   userProfile: UserProfile | null;
-  
-  // Actions
-  addPitch: (pitch: Omit<Pitch, 'id' | 'dateRecorded' | 'feedbackCount'>) => string;
+
+  addPitch: (pitch: Omit<Pitch, 'id' | 'feedbackCount' | 'createdAt' | 'updatedAt' | 'status' | 'progress'>) => string;
   updatePitch: (id: string, updates: Partial<Pitch>) => void;
   deletePitch: (id: string) => void;
   getPitch: (id: string) => Pitch | undefined;
@@ -72,8 +107,9 @@ interface PitchStore {
   setAnalyzing: (isAnalyzing: boolean) => void;
   setUserProfile: (profile: UserProfile | null) => void;
   updateUserProfile: (updates: Partial<UserProfile>) => void;
-  
-  // Utility functions
+  setPitches: (pitches: Pitch[]) => void;
+  upsertPitch: (pitch: Pitch) => void;
+
   getPitchesByType: (type: string) => Pitch[];
   getRecentPitches: (limit?: number) => Pitch[];
   getUserStats: () => {
@@ -87,21 +123,25 @@ interface PitchStore {
 export const usePitchStore = create<PitchStore>()(
   persist(
     (set, get) => ({
-      // Initial state
       pitches: [],
       currentPitch: null,
       isRecording: false,
       isAnalyzing: false,
       userProfile: null,
 
-      // Actions
       addPitch: (pitchData) => {
         const id = `pitch_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const now = new Date().toISOString();
         const newPitch: Pitch = {
           ...pitchData,
           id,
-          dateRecorded: new Date().toISOString(),
+          createdAt: now,
+          updatedAt: now,
+          status: 'recorded',
+          progress: 0,
           feedbackCount: 0,
+          analysis: pitchData.analysis ?? null,
+          transcription: pitchData.transcription ?? null,
         };
 
         set((state) => ({
@@ -117,7 +157,7 @@ export const usePitchStore = create<PitchStore>()(
           pitches: state.pitches.map((pitch) =>
             pitch.id === id ? { ...pitch, ...updates } : pitch
           ),
-          currentPitch: state.currentPitch?.id === id 
+          currentPitch: state.currentPitch?.id === id
             ? { ...state.currentPitch, ...updates }
             : state.currentPitch,
         }));
@@ -152,13 +192,35 @@ export const usePitchStore = create<PitchStore>()(
 
       updateUserProfile: (updates) => {
         set((state) => ({
-          userProfile: state.userProfile 
+          userProfile: state.userProfile
             ? { ...state.userProfile, ...updates }
             : null,
         }));
       },
 
-      // Utility functions
+      setPitches: (pitches) => {
+        set((state) => ({
+          pitches,
+          currentPitch: state.currentPitch
+            ? pitches.find((pitch) => pitch.id === state.currentPitch!.id) || state.currentPitch
+            : null,
+        }));
+      },
+
+      upsertPitch: (pitch) => {
+        set((state) => {
+          const existingIndex = state.pitches.findIndex((p) => p.id === pitch.id);
+          const updatedPitches = existingIndex >= 0
+            ? state.pitches.map((p) => (p.id === pitch.id ? pitch : p))
+            : [...state.pitches, pitch];
+
+          return {
+            pitches: updatedPitches,
+            currentPitch: state.currentPitch?.id === pitch.id ? pitch : state.currentPitch,
+          };
+        });
+      },
+
       getPitchesByType: (type) => {
         if (type === 'all') return get().pitches;
         return get().pitches.filter((pitch) => pitch.type === type);
@@ -166,7 +228,7 @@ export const usePitchStore = create<PitchStore>()(
 
       getRecentPitches: (limit = 5) => {
         return get().pitches
-          .sort((a, b) => new Date(b.dateRecorded).getTime() - new Date(a.dateRecorded).getTime())
+          .sort((a, b) => new Date(b.createdAt || b.dateRecorded || '').getTime() - new Date(a.createdAt || a.dateRecorded || '').getTime())
           .slice(0, limit);
       },
 
@@ -174,15 +236,14 @@ export const usePitchStore = create<PitchStore>()(
         const { pitches } = get();
         const totalPitches = pitches.length;
         const totalFeedback = pitches.reduce((sum, pitch) => sum + pitch.feedbackCount, 0);
-        const averageScore = pitches.length > 0 
+        const averageScore = pitches.length > 0
           ? pitches.reduce((sum, pitch) => sum + (pitch.analysis?.overallScore || 0), 0) / pitches.length
           : 0;
-        
-        // Recent activity (pitches in last 7 days)
+
         const weekAgo = new Date();
         weekAgo.setDate(weekAgo.getDate() - 7);
         const recentActivity = pitches.filter(
-          (pitch) => new Date(pitch.dateRecorded) > weekAgo
+          (pitch) => new Date(pitch.createdAt || pitch.dateRecorded || '') > weekAgo
         ).length;
 
         return {
@@ -195,16 +256,11 @@ export const usePitchStore = create<PitchStore>()(
     }),
     {
       name: 'pitchbuddy-storage',
-      // Only persist certain fields, not video blobs
       partialize: (state) => ({
-        pitches: state.pitches.map(pitch => ({
-          ...pitch,
-          videoBlob: undefined, // Don't persist video blobs
-        })),
+        pitches: state.pitches.map(({ videoBlob, ...pitch }) => ({ ...pitch })),
+        currentPitch: state.currentPitch ? ({ ...state.currentPitch, videoBlob: undefined }) : null,
         userProfile: state.userProfile,
       }),
-      // Skip hydration on server-side to prevent mismatches
-      skipHydration: typeof window === 'undefined',
     }
   )
 );

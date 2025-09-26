@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -40,7 +40,7 @@ model UserPreferences {
   userId            String @unique
   pitchType         String @default("Startup Pitch")
   experienceLevel   String @default("Beginner")
-  improvementGoals  String[] // Array of improvement goals
+  improvementGoals  String // JSON string of improvement goals array
   practiceFrequency String @default("Weekly")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -94,11 +94,11 @@ model PitchAnalysis {
   confidence           Float // Perceived confidence
 
   // Skill Breakdown (JSON)
-  skillBreakdown Json // Array of {category, score, previousScore}
+  skillBreakdown String // JSON string of {category, score, previousScore}
   
   // Feedback
-  feedback     String[] // Array of feedback strings
-  improvements String[] // Array of improvement suggestions
+  feedback     String // JSON string of feedback array
+  improvements String // JSON string of improvement suggestions array
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -112,8 +112,8 @@ model PitchTranscription {
   id         String @id @default(cuid())
   pitchId    String @unique
   text       String
-  timestamps Json   // Array of {word, start, end}
-  keyPhrases String[] // Array of key phrases found
+  timestamps String // JSON string of {word, start, end}
+  keyPhrases String // JSON string of key phrases found
   createdAt  DateTime @default(now())
 
   pitch Pitch @relation(fields: [pitchId], references: [id], onDelete: Cascade)

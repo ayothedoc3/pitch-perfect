@@ -6,10 +6,12 @@ import DebugPanel from '../components/debug/DebugPanel';
 import { usePitchStore, UserProfile } from '../stores/pitchStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import withAuth from '../components/auth/withAuth';
 
 const HomePage: React.FC = () => {
   const router = useRouter();
-  const { userProfile, setUserProfile } = usePitchStore();
+  const userProfile = usePitchStore((state) => state.userProfile);
+  const setUserProfile = usePitchStore((state) => state.setUserProfile);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
@@ -162,4 +164,4 @@ const HomePage: React.FC = () => {
   );
 };
 
-export default HomePage;
+export default withAuth(HomePage, { requireAuth: false });

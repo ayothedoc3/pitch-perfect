@@ -1,65 +1,159 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { usePitchStore } from '../../../stores/pitchStore';
+import { usePitchStore, mapPitchDetailToStorePitch } from '../../../stores/pitchStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { pitchesAPI } from '../../../lib/api';
+
+const steps = [
+  { number: 1, title: 'Speech Analysis', description: 'Analyzing your speech patterns, pacing, and clarity' },
+  { number: 2, title: 'Transcription', description: 'Converting your speech to text and identifying key phrases' },
+  { number: 3, title: 'Delivery Assessment', description: 'Evaluating confidence, tone variation, and body language' },
+  { number: 4, title: 'Feedback Generation', description: 'Creating personalized suggestions and improvements' },
+  { number: 5, title: 'Report Compilation', description: 'Finalizing your comprehensive pitch analysis' },
+];
+
+const statusMessages: Record<string, string> = {
+  recorded: 'Waiting for analysis to begin...',
+  analyzing: 'Analyzing your pitch...',
+  completed: 'Analysis complete! Preparing your report...',
+  failed: 'Analysis failed. Please try recording again.',
+};
+
+const deriveStepFromProgress = (status: string, progress: number): number => {
+  if (status === 'completed') {
+    return steps.length;
+  }
+
+  if (status === 'failed') {
+    return 1;
+  }
+
+  const safeProgress = Math.max(0, Math.min(progress, 100));
+
+  if (safeProgress >= 80) return 5;
+  if (safeProgress >= 60) return 4;
+  if (safeProgress >= 40) return 3;
+  if (safeProgress >= 20) return 2;
+  return 1;
+};
 
 const ProcessingPage: React.FC = () => {
   const router = useRouter();
   const { id } = router.query;
-  const { pitches } = usePitchStore();
-  const [processingStep, setProcessingStep] = useState(1);
-  
-  const pitch = pitches.find(p => p.id === id);
-  
-  // Simulate processing steps
+  const pitches = usePitchStore((state) => state.pitches);
+  const upsertPitch = usePitchStore((state) => state.upsertPitch);
+
+  const pitch = useMemo(() => {
+    if (!id || typeof id !== 'string') {
+      return undefined;
+    }
+    return pitches.find((item) => item.id === id);
+  }, [id, pitches]);
+
+  const [processingStep, setProcessingStep] = useState(() => deriveStepFromProgress(pitch?.status ?? 'recorded', pitch?.progress ?? 0));
+  const [progress, setProgress] = useState(pitch?.progress ?? 0);
+  const [statusMessage, setStatusMessage] = useState<string>(
+    statusMessages[pitch?.status ?? 'recorded'] ?? 'Preparing analysis...'
+  );
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
-    if (!pitch) return;
-    
-    const steps = [
-      { step: 1, duration: 1000, message: "Analyzing speech patterns..." },
-      { step: 2, duration: 1500, message: "Transcribing your pitch..." },
-      { step: 3, duration: 2000, message: "Evaluating delivery and confidence..." },
-      { step: 4, duration: 1500, message: "Generating personalized feedback..." },
-      { step: 5, duration: 1000, message: "Finalizing analysis..." }
-    ];
-    
-    let currentStep = 1;
-    
-    const processNextStep = () => {
-      if (currentStep <= steps.length) {
-        setProcessingStep(currentStep);
-        setTimeout(() => {
-          currentStep++;
-          if (currentStep > steps.length) {
-            // Analysis complete, redirect to results
-            router.push(`/pitch/${id}`);
-          } else {
-            processNextStep();
-          }
-        }, steps[currentStep - 1].duration);
+    if (!id || typeof id !== 'string') {
+      return;
+    }
+
+    if (pitch) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadPitch = async () => {
+      try {
+        const response = await pitchesAPI.getById(id);
+        if (!cancelled) {
+          upsertPitch(mapPitchDetailToStorePitch(response.pitch));
+        }
+      } catch (loadError) {
+        if (!cancelled) {
+          console.warn('Unable to fetch pitch detail', loadError);
+        }
       }
     };
-    
-    processNextStep();
-  }, [pitch, id, router]);
-  
-  const steps = [
-    { number: 1, title: "Speech Analysis", description: "Analyzing your speech patterns, pacing, and clarity" },
-    { number: 2, title: "Transcription", description: "Converting your speech to text and identifying key phrases" },
-    { number: 3, title: "Delivery Assessment", description: "Evaluating confidence, tone variation, and body language" },
-    { number: 4, title: "Feedback Generation", description: "Creating personalized suggestions and improvements" },
-    { number: 5, title: "Report Compilation", description: "Finalizing your comprehensive pitch analysis" }
-  ];
-  
+
+    loadPitch();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id, pitch, upsertPitch]);
+
+  useEffect(() => {
+    if (!id || typeof id !== 'string') {
+      return;
+    }
+
+    let cancelled = false;
+    let pollTimer: NodeJS.Timeout | null = null;
+
+    const pollStatus = async () => {
+      try {
+        const statusResponse = await pitchesAPI.getStatus(id);
+        if (cancelled) {
+          return;
+        }
+
+        const { status, progress: statusProgress = 0, hasAnalysis } = statusResponse;
+        const nextProgress = Math.max(0, Math.min(statusProgress, 100));
+
+        setProgress(nextProgress);
+        setStatusMessage(statusMessages[status] ?? 'Analyzing your pitch...');
+        setProcessingStep(deriveStepFromProgress(status, nextProgress));
+
+        if (status === 'failed') {
+          setError('Analysis failed. Please record again or contact support if the issue persists.');
+          return;
+        }
+
+        if (status === 'completed' && hasAnalysis) {
+          const detail = await pitchesAPI.getById(id);
+          if (!cancelled) {
+            upsertPitch(mapPitchDetailToStorePitch(detail.pitch));
+            router.replace(`/pitch/${id}`);
+          }
+          return;
+        }
+
+        pollTimer = setTimeout(pollStatus, 4000);
+      } catch {
+        if (cancelled) {
+          return;
+        }
+
+        setError('Having trouble checking the analysis status. Retrying...');
+        pollTimer = setTimeout(pollStatus, 6000);
+      }
+    };
+
+    pollStatus();
+
+    return () => {
+      cancelled = true;
+      if (pollTimer) {
+        clearTimeout(pollTimer);
+      }
+    };
+  }, [id, router, upsertPitch]);
+
   if (!pitch) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 flex items-center justify-center">
         <Card className="max-w-md">
           <CardContent className="p-6 text-center">
-            <p className="text-gray-600 mb-4">Pitch not found</p>
+            <p className="text-gray-600 mb-4">We&apos;re getting things ready...</p>
             <Button asChild>
               <Link href="/dashboard">Back to Dashboard</Link>
             </Button>
@@ -68,7 +162,9 @@ const ProcessingPage: React.FC = () => {
       </div>
     );
   }
-  
+
+  const progressPercentage = progress > 0 ? progress : Math.round(((processingStep - 1) / steps.length) * 100);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
       <Head>
@@ -76,7 +172,6 @@ const ProcessingPage: React.FC = () => {
       </Head>
       
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {/* Header */}
         <div className="text-center mb-12">
           <div className="w-20 h-20 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-6">
             <svg className="w-10 h-10 text-blue-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -87,14 +182,17 @@ const ProcessingPage: React.FC = () => {
             Analyzing Your Pitch
           </h1>
           <p className="text-xl text-gray-600 mb-2">
-            Our AI is hard at work analyzing &quot;{pitch.title}&quot;
+            We&apos;re processing &quot;{pitch.title}&quot;
           </p>
-          <p className="text-gray-500">
-            This usually takes 10-15 seconds. Hang tight!
-          </p>
+          <p className="text-gray-500">{statusMessage}</p>
         </div>
+
+        {error && (
+          <div className="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-yellow-800">
+            {error}
+          </div>
+        )}
         
-        {/* Progress Steps */}
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="text-center">Analysis Progress</CardTitle>
@@ -103,69 +201,60 @@ const ProcessingPage: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-6">
+            <div className="space-y-4">
               {steps.map((step) => {
                 const isActive = processingStep === step.number;
                 const isCompleted = processingStep > step.number;
-                
+
                 return (
-                  <div key={step.number} className="flex items-center">
-                    <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium border-2 ${
-                      isCompleted 
-                        ? 'bg-green-500 border-green-500 text-white' 
-                        : isActive 
-                        ? 'border-blue-500 text-blue-600 bg-blue-50' 
-                        : 'border-gray-300 text-gray-400'
+                  <div
+                    key={step.number}
+                    className={`flex items-start rounded-lg border p-4 transition-colors ${
+                      isCompleted
+                        ? 'border-green-200 bg-green-50'
+                        : isActive
+                        ? 'border-blue-200 bg-blue-50'
+                        : 'border-gray-200 bg-white'
+                    }`}
+                  >
+                    <div className={`mr-4 flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold ${
+                      isCompleted
+                        ? 'bg-green-500 text-white'
+                        : isActive
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-200 text-gray-600'
                     }`}>
                       {isCompleted ? (
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                       ) : (
                         step.number
                       )}
                     </div>
-                    <div className="ml-4 flex-1">
-                      <div className={`text-sm font-medium ${
-                        isActive ? 'text-blue-600' : isCompleted ? 'text-green-600' : 'text-gray-400'
-                      }`}>
-                        {step.title}
-                        {isActive && (
-                          <span className="ml-2 animate-pulse">...</span>
-                        )}
-                      </div>
-                      <div className={`text-sm mt-1 ${
-                        isActive ? 'text-gray-600' : 'text-gray-400'
-                      }`}>
-                        {step.description}
-                      </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{step.title}</h3>
+                      <p className="text-sm text-gray-600">{step.description}</p>
                     </div>
-                    {isActive && (
-                      <div className="flex-shrink-0">
-                        <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                      </div>
-                    )}
                   </div>
                 );
               })}
             </div>
             
-            {/* Progress Bar */}
             <div className="mt-8">
               <div className="bg-gray-200 rounded-full h-3">
                 <div 
                   className="bg-gradient-to-r from-blue-500 to-green-500 h-3 rounded-full transition-all duration-500" 
-                  style={{ width: `${(processingStep / steps.length) * 100}%` }}
+                  style={{ width: `${progressPercentage}%` }}
                 ></div>
               </div>
               <div className="text-center mt-2 text-sm text-gray-600">
-                {Math.round((processingStep / steps.length) * 100)}% Complete
+                {progressPercentage}% Complete
               </div>
             </div>
           </CardContent>
         </Card>
         
-        {/* What to Expect */}
         <Card>
           <CardHeader>
             <CardTitle>What You&apos;ll Get</CardTitle>
@@ -224,10 +313,9 @@ const ProcessingPage: React.FC = () => {
           </CardContent>
         </Card>
         
-        {/* Skip Option */}
         <div className="text-center mt-8">
           <p className="text-sm text-gray-500 mb-4">
-            Taking too long? You can view your recording now and check analysis later.
+            Taking too long? You can view your recording now and check analysis once it&apos;s ready.
           </p>
           <Button variant="outline" asChild>
             <Link href={`/pitch/${id}`}>

@@ -8,6 +8,18 @@ import { logger } from '../config/logger';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
 import { validate, schemas } from '../middleware/validation';
 import { SpeechAnalysisService } from '../services/speechAnalysis';
+import dotenv from 'dotenv';
+
+// Ensure environment variables are loaded
+const envPath = path.join(__dirname, '../../.env');
+if (fs.existsSync(envPath)) {
+  dotenv.config({ path: envPath });
+}
+
+// Trim NODE_ENV if it has extra spaces
+if (process.env.NODE_ENV) {
+  process.env.NODE_ENV = process.env.NODE_ENV.trim();
+}
 
 const router = Router();
 
@@ -68,8 +80,24 @@ router.get('/', authenticateToken, async (req: AuthRequest, res) => {
       where: { userId }
     });
 
+    // Parse JSON fields for each pitch
+    const parsedPitches = pitches.map(pitch => ({
+      ...pitch,
+      analysis: pitch.analysis ? {
+        ...pitch.analysis,
+        skillBreakdown: JSON.parse(pitch.analysis.skillBreakdown),
+        feedback: JSON.parse(pitch.analysis.feedback),
+        improvements: JSON.parse(pitch.analysis.improvements)
+      } : null,
+      transcription: pitch.transcription ? {
+        ...pitch.transcription,
+        timestamps: JSON.parse(pitch.transcription.timestamps),
+        keyPhrases: JSON.parse(pitch.transcription.keyPhrases)
+      } : null
+    }));
+
     res.json({
-      pitches,
+      pitches: parsedPitches,
       pagination: {
         total,
         page: Number(page),
@@ -101,7 +129,23 @@ router.get('/:id', authenticateToken, async (req: AuthRequest, res) => {
       return res.status(404).json({ error: 'Pitch not found' });
     }
 
-    res.json({ pitch });
+    // Parse JSON fields
+    const parsedPitch = {
+      ...pitch,
+      analysis: pitch.analysis ? {
+        ...pitch.analysis,
+        skillBreakdown: JSON.parse(pitch.analysis.skillBreakdown),
+        feedback: JSON.parse(pitch.analysis.feedback),
+        improvements: JSON.parse(pitch.analysis.improvements)
+      } : null,
+      transcription: pitch.transcription ? {
+        ...pitch.transcription,
+        timestamps: JSON.parse(pitch.transcription.timestamps),
+        keyPhrases: JSON.parse(pitch.transcription.keyPhrases)
+      } : null
+    };
+
+    res.json({ pitch: parsedPitch });
   } catch (error) {
     logger.error('Get pitch error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -199,9 +243,9 @@ router.post('/:id/upload', authenticateToken, upload.single('file'), async (req:
               fillerWordFrequency: analysisResult.metrics.fillerWordFrequency,
               toneVariation: analysisResult.metrics.toneVariation,
               confidence: analysisResult.metrics.confidence,
-              skillBreakdown: analysisResult.skillBreakdown,
-              feedback: analysisResult.feedback,
-              improvements: analysisResult.improvements
+              skillBreakdown: JSON.stringify(analysisResult.skillBreakdown),
+              feedback: JSON.stringify(analysisResult.feedback),
+              improvements: JSON.stringify(analysisResult.improvements)
             }
           });
 
@@ -210,8 +254,8 @@ router.post('/:id/upload', authenticateToken, upload.single('file'), async (req:
             data: {
               pitchId: id,
               text: analysisResult.transcription.text,
-              timestamps: analysisResult.transcription.timestamps,
-              keyPhrases: analysisResult.transcription.keyPhrases
+              timestamps: JSON.stringify(analysisResult.transcription.timestamps),
+              keyPhrases: JSON.stringify(analysisResult.transcription.keyPhrases)
             }
           });
 
