@@ -85,7 +85,7 @@ function SignupPage() {
       } else {
         setErrors({ submit: result.error || 'Registration failed' });
       }
-    } catch (error) {
+    } catch {
       setErrors({ submit: 'An unexpected error occurred. Please try again.' });
     } finally {
       setIsLoading(false);

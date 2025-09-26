@@ -67,7 +67,7 @@ function LoginPage() {
       } else {
         setErrors({ submit: result.error || 'Login failed' });
       }
-    } catch (error) {
+    } catch {
       setErrors({ submit: 'An unexpected error occurred. Please try again.' });
     } finally {
       setIsLoading(false);

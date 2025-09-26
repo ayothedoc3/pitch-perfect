@@ -173,7 +173,7 @@ export const PitchRecorder: React.FC<PitchRecorderProps> = ({
       );
       setRecordingState('idle');
     }
-  }, [audioRecorder.audioBlob, audioRecorder.duration, enableVideo, onRecordingComplete, videoBlob]);
+  }, [audioRecorder.audioBlob, audioRecorder.duration, enableVideo, onRecordingComplete, videoBlob, recordingState]);
 
   useEffect(() => {
     return () => {
