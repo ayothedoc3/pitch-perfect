@@ -18,7 +18,7 @@
     "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
     "clean": "rm -rf frontend/node_modules backend/node_modules frontend/.next backend/dist"
   },
-  "devDependencies": {
+  "dependencies": {
     "concurrently": "^8.2.2"
   }
 }

@@ -5,7 +5,7 @@ const nextConfig = {
   reactStrictMode: true,
 
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api',
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || '/api',
   },
 
   images: {
@@ -25,6 +25,15 @@ const nextConfig = {
     }
 
     return config;
+  },
+
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: process.env.INTERNAL_API_URL || 'http://127.0.0.1:3011/api/:path*',
+      },
+    ];
   },
 
   async headers() {

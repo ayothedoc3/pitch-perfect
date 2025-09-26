@@ -1,41 +1,47 @@
-# Use Node.js 18 LTS
+# Build and run frontend + backend in a single container
 FROM node:18-alpine
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
+# Install required OS packages
+RUN apk add --no-cache \
+    dumb-init \
+    python3 \
+    make \
+    g++ \
+    libc6-compat \
+    openssl
 
-# Set working directory
 WORKDIR /app
 
-# Copy package files first for better caching
+# Copy package manifests first (root + workspaces)
 COPY package*.json ./
+COPY backend/package*.json ./backend/
 COPY frontend/package*.json ./frontend/
+COPY backend/prisma ./backend/prisma/
 
-# Configure npm for better reliability
-RUN npm config set fetch-retry-mintimeout 20000 && \
-    npm config set fetch-retry-maxtimeout 120000 && \
-    npm config set fetch-retries 5
+# Install root dependencies (includes concurrently)
+RUN npm ci
 
-# Install root dependencies
-RUN npm ci --only=production=false --no-audit
+# Install workspace dependencies
+RUN cd backend && npm ci
+RUN cd frontend && npm ci
 
-# Install frontend dependencies
-WORKDIR /app/frontend
-RUN npm ci --only=production=false --no-audit
-
-# Copy source code
-WORKDIR /app
+# Copy the rest of the repository
 COPY . .
 
-# Build frontend
-WORKDIR /app/frontend
+# Build backend (ts -> dist) and frontend (Next.js)
 RUN npm run build
 
-# Expose port
+# Ensure uploads directory exists for runtime storage
+RUN mkdir -p backend/uploads
+
+ENV NODE_ENV=production \
+    NEXT_TELEMETRY_DISABLED=1 \
+    PORT=3000 \
+    BACKEND_PORT=3011 \
+    INTERNAL_API_URL=http://127.0.0.1:3011/api/:path*
+
 EXPOSE 3000
+EXPOSE 3011
 
-# Use dumb-init for proper signal handling
 ENTRYPOINT ["dumb-init", "--"]
-
-# Start the application
-CMD ["npm", "start"]
+CMD ["npm", "run", "start"]

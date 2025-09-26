@@ -61,7 +61,7 @@ export class SpeechUploadService {
   private baseUrl: string;
   private token: string | null;
 
-  constructor(baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3010/api') {
+  constructor(baseUrl = process.env.NEXT_PUBLIC_API_URL || '/api') {
     this.baseUrl = baseUrl;
     this.token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
   }
