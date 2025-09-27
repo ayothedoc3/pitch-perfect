@@ -37,11 +37,10 @@ RUN mkdir -p backend/uploads
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     PORT=3000 \
-    BACKEND_PORT=3011 \
-    INTERNAL_API_URL=http://127.0.0.1:3011/api/:path*
+    BACKEND_PORT=3001
 
 EXPOSE 3000
-EXPOSE 3011
+EXPOSE 3001
 
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["npm", "run", "start"]
