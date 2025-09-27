@@ -1,4 +1,4 @@
-# Build and run frontend + backend in a single container
+# Unified Next.js application with API routes
 FROM node:18-alpine
 
 # Install required OS packages
@@ -18,7 +18,7 @@ COPY backend/package*.json ./backend/
 COPY frontend/package*.json ./frontend/
 COPY backend/prisma ./backend/prisma/
 
-# Install root dependencies (includes concurrently)
+# Install root dependencies
 RUN npm ci
 
 # Install workspace dependencies
@@ -32,16 +32,13 @@ COPY . .
 RUN npm run build
 
 # Ensure uploads directory exists for runtime storage
-RUN mkdir -p backend/uploads
+RUN mkdir -p frontend/uploads
 
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
-    PORT=3000 \
-    BACKEND_PORT=3011 \
-    INTERNAL_API_URL=http://127.0.0.1:3011/api/:path*
+    PORT=3000
 
 EXPOSE 3000
-EXPOSE 3011
 
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["npm", "run", "start"]
