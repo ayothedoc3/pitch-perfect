@@ -40,7 +40,7 @@ if (process.env.NODE_ENV) {
 }
 
 const app = express();
-const PORT = process.env.PORT || 3011;
+const PORT = process.env.BACKEND_PORT || process.env.PORT || 3011;
 
 const rawCorsOrigins = [
   process.env.FRONTEND_URL,
