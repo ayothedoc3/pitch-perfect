@@ -7,7 +7,7 @@ npm run build
 '''
 
 [start]
-cmd = "cd frontend && npm start"
+cmd = "npm run start"
 
 [variables]
 NODE_ENV = "production"
