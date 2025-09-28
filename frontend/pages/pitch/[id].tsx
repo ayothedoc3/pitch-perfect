@@ -180,16 +180,31 @@ export default function PitchDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <div className="card">
-              <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-20 h-20 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                    <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293H15M9 10V9a3 3 0 013-3h0a3 3 0 013 3v1" />
-                    </svg>
+              <div className="aspect-video bg-black rounded-lg overflow-hidden flex items-center justify-center">
+                {pitch.videoUrl ? (
+                  <video
+                    src={pitch.videoUrl}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    className="w-full h-full object-contain bg-black"
+                  />
+                ) : pitch.audioUrl ? (
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-gray-900 text-gray-200 p-6">
+                    <audio src={pitch.audioUrl} controls className="w-full" />
+                    <p className="text-xs text-gray-400 mt-3">Audio only. Duration: {formatDuration(pitch.duration)}</p>
                   </div>
-                  <p className="text-gray-600">Video playback coming soon</p>
-                  <p className="text-sm text-gray-500 mt-1">Duration: {formatDuration(pitch.duration)}</p>
-                </div>
+                ) : (
+                  <div className="text-center">
+                    <div className="w-20 h-20 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                      <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293H15M9 10V9a3 3 0 013-3h0a3 3 0 013 3v1" />
+                      </svg>
+                    </div>
+                    <p className="text-gray-300">No media available</p>
+                    <p className="text-xs text-gray-400 mt-1">Duration: {formatDuration(pitch.duration)}</p>
+                  </div>
+                )}
               </div>
             </div>
 
