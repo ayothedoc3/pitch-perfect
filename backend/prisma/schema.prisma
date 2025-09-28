@@ -6,31 +6,31 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id          String   @id @default(cuid())
-  email       String   @unique
-  name        String?
-  password    String
-  avatar      String?
-  level       String   @default("beginner") // beginner, intermediate, advanced
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  avatar    String?
+  level     String   @default("beginner") // beginner, intermediate, advanced
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // User preferences
   preferences UserPreferences?
 
   // User stats
-  totalPitches   Int @default(0)
-  totalFeedback  Int @default(0)
-  currentStreak  Int @default(0)
-  
+  totalPitches  Int @default(0)
+  totalFeedback Int @default(0)
+  currentStreak Int @default(0)
+
   // Relations
-  pitches        Pitch[]
-  sessions       Session[]
+  pitches  Pitch[]
+  sessions Session[]
 
   @@map("users")
 }
@@ -61,21 +61,21 @@ model Session {
 }
 
 model Pitch {
-  id          String   @id @default(cuid())
-  userId      String
-  title       String
-  type        String   @default("startup") // startup, elevator, sales
-  duration    Int      // seconds
-  videoUrl    String?  // URL to stored video file
-  audioUrl    String?  // URL to stored audio file
-  progress    Int      @default(0) // Analysis progress percentage
-  status      String   @default("recorded") // recorded, analyzing, completed, failed
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  type      String   @default("startup") // startup, elevator, sales
+  duration  Int // seconds
+  videoUrl  String? // URL to stored video file
+  audioUrl  String? // URL to stored audio file
+  progress  Int      @default(0) // Analysis progress percentage
+  status    String   @default("recorded") // recorded, analyzing, completed, failed
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relations
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  analysis     PitchAnalysis?
+  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analysis      PitchAnalysis?
   transcription PitchTranscription?
 
   @@map("pitches")
@@ -87,15 +87,15 @@ model PitchAnalysis {
   overallScore Int
 
   // Speech Metrics
-  pacing               Float // Words per minute
-  clarity              Float // 0-1 scale
-  fillerWordFrequency  Float // Frequency of um, uh, like, etc.
-  toneVariation        Float // Variation in pitch/tone
-  confidence           Float // Perceived confidence
+  pacing              Float // Words per minute
+  clarity             Float // 0-1 scale
+  fillerWordFrequency Float // Frequency of um, uh, like, etc.
+  toneVariation       Float // Variation in pitch/tone
+  confidence          Float // Perceived confidence
 
   // Skill Breakdown (JSON)
   skillBreakdown String // JSON string of {category, score, previousScore}
-  
+
   // Feedback
   feedback     String // JSON string of feedback array
   improvements String // JSON string of improvement suggestions array
@@ -109,8 +109,8 @@ model PitchAnalysis {
 }
 
 model PitchTranscription {
-  id         String @id @default(cuid())
-  pitchId    String @unique
+  id         String   @id @default(cuid())
+  pitchId    String   @unique
   text       String
   timestamps String // JSON string of {word, start, end}
   keyPhrases String // JSON string of key phrases found

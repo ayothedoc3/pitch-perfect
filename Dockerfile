@@ -41,7 +41,6 @@ ENV NODE_ENV=production \
     INTERNAL_API_URL=http://127.0.0.1:3011/api/:path*
 
 EXPOSE 3000
-EXPOSE 3011
 
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["npm", "run", "start"]

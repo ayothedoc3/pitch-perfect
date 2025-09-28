@@ -12,7 +12,7 @@
     "build:backend": "cd backend && npm run build",
     "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
     "start:frontend": "cd frontend && npm run start",
-    "start:backend": "cd backend && npm run start",
+    "start:backend": "cd backend && npm run start:prod",
     "lint": "npm run lint:frontend",
     "lint:frontend": "cd frontend && npm run lint",
     "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
