@@ -59,37 +59,62 @@ export interface UserProfile {
   };
 }
 
-export const mapPitchDetailToStorePitch = (detail: PitchDetail): Pitch => ({
-  id: detail.id,
-  title: detail.title,
-  type: detail.type,
-  duration: detail.duration,
-  dateRecorded: detail.createdAt,
-  createdAt: detail.createdAt,
-  updatedAt: detail.updatedAt,
-  status: detail.status,
-  progress: detail.progress,
-  videoUrl: detail.videoUrl ?? null,
-  audioUrl: detail.audioUrl ?? null,
-  thumbnailUrl: undefined,
-  transcription: detail.transcription
-    ? {
-        text: detail.transcription.text,
-        keyPhrases: detail.transcription.keyPhrases,
-        timestamps: detail.transcription.timestamps,
-      }
-    : null,
-  analysis: detail.analysis
-    ? {
-        overallScore: detail.analysis.overallScore,
-        metrics: detail.analysis.metrics,
-        skillBreakdown: detail.analysis.skillBreakdown,
-        feedback: detail.analysis.feedback,
-        improvements: detail.analysis.improvements,
-      }
-    : null,
-  feedbackCount: detail.analysis ? detail.analysis.feedback.length : 0,
-});
+export const mapPitchDetailToStorePitch = (detail: PitchDetail | any): Pitch => {
+  const analysis = detail?.analysis;
+
+  // Support both shapes coming from the API:
+  // 1) normalized (analysis.metrics.{pacing, clarity, ...})
+  // 2) flat fields under analysis (analysis.pacing, analysis.clarity, ...)
+  const metrics = analysis
+    ? (
+        analysis.metrics ?? {
+          pacing: analysis.pacing ?? 0,
+          clarity: analysis.clarity ?? 0,
+          fillerWordFrequency: analysis.fillerWordFrequency ?? 0,
+          toneVariation: analysis.toneVariation ?? 0,
+          confidence: analysis.confidence ?? 0,
+        }
+      )
+    : undefined;
+
+  return {
+    id: detail.id,
+    title: detail.title,
+    type: detail.type,
+    duration: detail.duration,
+    dateRecorded: detail.createdAt,
+    createdAt: detail.createdAt,
+    updatedAt: detail.updatedAt,
+    status: detail.status,
+    progress: detail.progress,
+    videoUrl: detail.videoUrl ?? null,
+    audioUrl: detail.audioUrl ?? null,
+    thumbnailUrl: undefined,
+    transcription: detail.transcription
+      ? {
+          text: detail.transcription.text,
+          keyPhrases: detail.transcription.keyPhrases,
+          timestamps: detail.transcription.timestamps,
+        }
+      : null,
+    analysis: analysis
+      ? {
+          overallScore: analysis.overallScore ?? 0,
+          metrics: metrics as {
+            pacing: number;
+            clarity: number;
+            fillerWordFrequency: number;
+            toneVariation: number;
+            confidence: number;
+          },
+          skillBreakdown: analysis.skillBreakdown ?? [],
+          feedback: analysis.feedback ?? [],
+          improvements: analysis.improvements ?? [],
+        }
+      : null,
+    feedbackCount: analysis ? (analysis.feedback?.length ?? 0) : 0,
+  };
+};
 
 interface PitchStore {
   pitches: Pitch[];
