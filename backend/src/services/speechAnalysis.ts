@@ -337,7 +337,7 @@ Respond with ONLY this JSON format: {"clarity": 0.8, "toneVariation": 0.7, "conf
         throw new Error('OpenAI client not initialized');
       }
 
-      const prompt = `Generate 3-4 specific, actionable feedback points for this pitch based on the analysis:
+      const prompt = `Generate 3-4 specific, actionable feedback points for this pitch based on the analysis.
 
 SPEECH METRICS:
 - Pacing: ${metrics.pacing.toFixed(1)} words per minute
@@ -346,22 +346,21 @@ SPEECH METRICS:
 - Tone variation: ${(metrics.toneVariation * 100).toFixed(1)}%
 - Confidence: ${(metrics.confidence * 100).toFixed(1)}%
 
-TRANSCRIPT SAMPLE: "${transcription.text.substring(0, 300)}..."
+TRANSCRIPT SAMPLE (trimmed): "${transcription.text.substring(0, 300)}..."
 
-Generate feedback as a JSON array of strings. Each should be:
-- Specific and actionable
-- Encouraging but honest
-- Focused on improvement
-- Professional tone
+Style requirements (very important):
+- Be blunt and direct. No praise, no flattery, no hedging.
+- Use imperative voice and tell the speaker what to fix.
+- Each point <= 16 words. One concrete fix per line.
+- No emojis. No exclamation marks. No niceties.
+- Focus on delivery (pace, clarity, tone, confidence) and content punch.
 
-Example format: ["Great pacing! You maintained an optimal speaking rate.", "Consider reducing filler words to sound more polished."]
-
-Respond with ONLY the JSON array.`;
+Return ONLY a JSON array of strings, e.g. ["Slow down to 140â€“160 WPM", "Cut filler words; pause"]`;
 
       const response = await this.openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: [{ role: 'user', content: prompt }],
-        temperature: 0.7,
+        temperature: 0.4,
         max_tokens: 300,
       });
 
@@ -453,23 +452,23 @@ Respond with ONLY the JSON array.`;
     const improvements: string[] = [];
 
     if (metrics.pacing < 130 || metrics.pacing > 180) {
-      improvements.push("Practice maintaining optimal speaking pace (130-180 WPM)");
+      improvements.push("Fix your pace: target 130–180 WPM");
     }
 
     if (metrics.clarity < 0.8) {
-      improvements.push("Practice articulation exercises and vocal warm-ups");
+      improvements.push("Articulation is muddy—do daily enunciation drills");
     }
 
     if (metrics.fillerWordFrequency > 0.03) {
-      improvements.push("Practice pausing instead of using filler words");
+      improvements.push("Cut filler words; pause instead");
     }
 
     if (metrics.confidence < 0.7) {
-      improvements.push("Record practice sessions to build confidence");
+      improvements.push("You sound hesitant—record and review a 2-minute pitch daily");
     }
 
     if (transcription.keyPhrases.length < 4) {
-      improvements.push("Include more specific business metrics and terminology");
+      improvements.push("Use concrete metrics \(ARR, retention, CAC\); stop speaking in generalities");
     }
 
     return improvements.slice(0, 4);
