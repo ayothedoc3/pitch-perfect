@@ -33,6 +33,10 @@ const nextConfig = {
         source: '/api/:path*',
         destination: process.env.INTERNAL_API_URL || 'http://127.0.0.1:3011/api/:path*',
       },
+      {
+        source: '/uploads/:path*',
+        destination: process.env.INTERNAL_UPLOAD_URL || 'http://127.0.0.1:3011/uploads/:path*',
+      },
     ];
   },
 
