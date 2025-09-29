@@ -19,11 +19,11 @@ COPY frontend/package*.json ./frontend/
 COPY backend/prisma ./backend/prisma/
 
 # Install root dependencies (includes concurrently)
-RUN npm ci
+RUN npm config set fetch-retry-mintimeout 20000 \`n && npm config set fetch-retry-maxtimeout 120000 \`n && npm config set fetch-retries 5 \`n && npm config set audit false \`n && npm config set fund false \`n && npm ci
 
 # Install workspace dependencies
-RUN cd backend && npm ci
-RUN cd frontend && npm ci
+RUN cd backend \`n && npm ci --no-audit --fund=false \`n || (npm cache verify && npm ci --no-audit --fund=false)
+RUN cd frontend \`n && npm ci --no-audit --fund=false \`n || (npm cache verify && npm ci --no-audit --fund=false)
 
 # Copy the rest of the repository
 COPY . .
@@ -44,3 +44,4 @@ EXPOSE 3000
 
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["npm", "run", "start"]
+
