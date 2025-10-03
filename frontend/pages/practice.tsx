@@ -3,12 +3,14 @@ import { useRouter } from 'next/router';
 import PitchRecorder from '../components/pitch/PitchRecorder';
 import { SpeechUploadService, PitchDetail, AnalysisResult } from '../services/SpeechUploadService';
 import { usePitchStore, mapPitchDetailToStorePitch } from '../stores/pitchStore';
+import { usePostHog } from '../hooks/usePostHog';
 
 const speechUploadServiceFactory = () => new SpeechUploadService();
 
 const PitchPracticePage: React.FC = () => {
   const router = useRouter();
   const upsertPitch = usePitchStore((state) => state.upsertPitch);
+  const { trackEvent } = usePostHog();
 
   const serviceRef = useRef<SpeechUploadService | null>(null);
   if (serviceRef.current === null) {
@@ -42,6 +44,11 @@ const PitchPracticePage: React.FC = () => {
     setAnalysisProgress(0);
     setAnalysisStatus('queued');
 
+    trackEvent('pitch_recording_started', {
+      duration,
+      hasVideo: !!videoBlob,
+    });
+
     try {
       const result = await speechUploadService.analyzeRecording(
         audioBlob,
@@ -63,14 +70,27 @@ const PitchPracticePage: React.FC = () => {
       setAnalysisResult(result.analysis ?? null);
       setAnalysisProgress(100);
       setAnalysisStatus('completed');
+
+      trackEvent('pitch_analysis_completed', {
+        pitchId: result.id,
+        duration,
+        overallScore: result.analysis?.overallScore,
+        clarity: result.analysis?.metrics.clarity,
+        confidence: result.analysis?.metrics.confidence,
+      });
     } catch (err) {
       console.error('Analysis failed:', err);
       const errorMessage = err instanceof Error ? err.message : 'Speech analysis failed';
       setError(errorMessage);
+
+      trackEvent('pitch_analysis_failed', {
+        error: errorMessage,
+        duration,
+      });
     } finally {
       setIsAnalyzing(false);
     }
-  }, [speechUploadService, upsertPitch]);
+  }, [speechUploadService, upsertPitch, trackEvent]);
 
   const handleError = useCallback((errorMessage: string) => {
     console.error('Recording error:', errorMessage);
