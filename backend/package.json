@@ -14,7 +14,9 @@
     "migrate:deploy": "npx prisma migrate deploy",
     "migrate:prod": "npx prisma generate && npx prisma migrate deploy",
     "generate": "npx prisma generate",
-    "studio": "npx prisma studio"
+    "studio": "npx prisma studio",
+    "seed": "npm run generate && tsx scripts/seed.ts",
+    "seed:prod": "node scripts/seed.js"
   },
   "dependencies": {
     "@prisma/client": "^5.7.1",
