@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/router';
+import { usePitchStore } from '../stores/pitchStore';
 
 interface User {
   id: string;
@@ -76,6 +77,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (response.ok && data.token) {
         localStorage.setItem('auth_token', data.token);
         setUser(data.user);
+        // Clear any persisted local pitches from a previous user
+        try {
+          usePitchStore.getState().resetStore();
+          localStorage.removeItem('pitchbuddy-storage');
+        } catch {}
         return { success: true };
       } else {
         return { success: false, error: data.error || 'Login failed' };
@@ -101,6 +107,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (response.ok && data.token) {
         localStorage.setItem('auth_token', data.token);
         setUser(data.user);
+        // Ensure a fresh dashboard for new accounts
+        try {
+          usePitchStore.getState().resetStore();
+          localStorage.removeItem('pitchbuddy-storage');
+        } catch {}
         return { success: true };
       } else {
         return { success: false, error: data.error || 'Registration failed' };
@@ -113,6 +124,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('auth_token');
+    try {
+      usePitchStore.getState().resetStore();
+      localStorage.removeItem('pitchbuddy-storage');
+    } catch {}
     setUser(null);
     router.push('/');
   };

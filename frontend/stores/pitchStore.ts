@@ -143,16 +143,21 @@ interface PitchStore {
     averageScore: number;
     recentActivity: number;
   };
+  resetStore: () => void;
 }
+
+const initialState = {
+  pitches: [] as Pitch[],
+  currentPitch: null as Pitch | null,
+  isRecording: false,
+  isAnalyzing: false,
+  userProfile: null as UserProfile | null,
+};
 
 export const usePitchStore = create<PitchStore>()(
   persist(
     (set, get) => ({
-      pitches: [],
-      currentPitch: null,
-      isRecording: false,
-      isAnalyzing: false,
-      userProfile: null,
+      ...initialState,
 
       addPitch: (pitchData) => {
         const id = `pitch_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -277,6 +282,9 @@ export const usePitchStore = create<PitchStore>()(
           averageScore,
           recentActivity,
         };
+      },
+      resetStore: () => {
+        set({ ...initialState });
       },
     }),
     {
